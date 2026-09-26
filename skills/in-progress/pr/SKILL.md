@@ -1,6 +1,6 @@
 ---
 name: pr
-description: "Use when writing a PR body."
+description: "[Experimental] Use when writing a PR body."
 metadata:
   credits:
     skill: show-me
