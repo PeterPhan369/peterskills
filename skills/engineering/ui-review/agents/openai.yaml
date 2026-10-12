@@ -1,0 +1,5 @@
+interface:
+  display_name: "UI Review"
+  short_description: "Audit UI code against heuristics and detector rules"
+policy:
+  allow_implicit_invocation: false

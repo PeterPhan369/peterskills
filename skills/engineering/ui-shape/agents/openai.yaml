@@ -1,0 +1,5 @@
+interface:
+  display_name: "UI Shape"
+  short_description: "Plan layouts, component seams, and states before coding"
+policy:
+  allow_implicit_invocation: false
