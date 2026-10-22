@@ -187,6 +187,30 @@
       "skillPath": "skills/engineering/triage/SKILL.md",
       "computedHash": "363ca4f1b97ca5227d41d3973178ab301d7c498ba41b466dfe30b6163f6d72b5"
     },
+    "ui-craft-floor": {
+      "source": "PeterPhan369/peterskills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/ui-craft-floor/SKILL.md",
+      "computedHash": "a1e7bc6975c00c6997419d61a95939e7096edbd6e6960803c7c8bd37503beb55"
+    },
+    "ui-polish": {
+      "source": "PeterPhan369/peterskills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/ui-polish/SKILL.md",
+      "computedHash": "2fd3f603b32759f5b69facf7a634ca9811a18c5e4b46a59998a3e9cf73a50666"
+    },
+    "ui-review": {
+      "source": "PeterPhan369/peterskills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/ui-review/SKILL.md",
+      "computedHash": "3177ee4f0886d18d8a21edf1816b89281a73456e49b3087225e885732b2997ed"
+    },
+    "ui-shape": {
+      "source": "PeterPhan369/peterskills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/ui-shape/SKILL.md",
+      "computedHash": "ea48a5ba17c07e569377b58e42e62d643d3f811cc615ac9799bd69ae012de3c1"
+    },
     "wait-what": {
       "source": "PeterPhan369/peterskills",
       "sourceType": "github",

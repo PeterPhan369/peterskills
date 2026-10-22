@@ -1,0 +1,5 @@
+interface:
+  display_name: "UI Polish"
+  short_description: "Refine and repair existing UI and styles"
+policy:
+  allow_implicit_invocation: false
