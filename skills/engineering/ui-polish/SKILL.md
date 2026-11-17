@@ -23,7 +23,7 @@ Follow these steps in sequence:
 ### Step 1: Scope and Inspect
 
 1. **Locate target files**: Read the components, templates, styles, and markup named in the request or surrounding the target view.
-2. **Scan for anti-patterns**: Inspect the code against the quality floor in `ui-craft-floor` and the 59 rules in `DETECTOR-RULES.md`:
+2. **Scan for anti-patterns**: Inspect the code against the quality floor in `ui-craft-floor` and the 75 rules in `DETECTOR-RULES.md`:
    - Check color contrast (ensure at least 4.5:1 on text).
    - Check for muddy gray-on-color text, generic AI gradients, or untinted black.
    - Check for nested cards, awkward border accents on rounded containers, and monotonous spacing.
@@ -63,7 +63,7 @@ If the user gives general instructions like "polish this page", apply the **Hard
 The polish pass is complete when:
 
 1. Every specific request in the user's prompt has been addressed in code.
-2. All identified anti-patterns from the 59 detector rules have been resolved.
+2. All identified anti-patterns from the 75 detector rules have been resolved.
 3. Contrast ratios meet or exceed WCAG AA standards.
 4. Layout scales cleanly on both mobile and desktop viewports without horizontal overflow.
 5. All interactive elements provide clear hover, active, focus, and disabled states.

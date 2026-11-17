@@ -58,7 +58,7 @@ A starting situation that generates work, then merges onto the main flow.
 Not feature work, just upkeep.
 
 - **`/improve-codebase-architecture`** runs whenever you have a spare moment to keep the codebase good for agents to operate in. It surfaces **deepening opportunities**; picking one _generates an idea_ you can take into the main flow at `/grill-with-docs`. It's the survey that finds the candidates; **`/codebase-design`** (below) is the bench you design the chosen one on.
-- **`/ui-review`** evaluates existing frontend code against usability heuristics and 59 deterministic detector rules. It outputs prioritized findings (P0 to P3) without editing code, catching accessibility defects, AI tells, and layout breakage before you ship.
+- **`/ui-review`** evaluates existing frontend code against usability heuristics and 75 deterministic detector rules. It outputs prioritized findings (P0 to P3) without editing code, catching accessibility defects, AI tells, and layout breakage before you ship.
 - **`/ui-polish`** takes an existing component or page and repairs it directly based on your instructions, selecting targeted directional playbooks (Bolder, Quieter, Distill, Layout, Typeset, Colorize, Animate, Harden) to elevate visual craft.
 
 ## Vocabulary underneath
@@ -94,7 +94,7 @@ Off the main flow entirely.
 - **`/wait-what`** is the corrective for a message that didn't land. Use it mid-conversation, inside any other skill, and the agent re-pitches what it just said with the context you were missing, in plain English, using the `GLOSSARY.md` vocabulary. It works after the fact; `/grill-with-docs` is the upfront cure, because a shared language agreed early is what stops the jargon arriving at all.
 - **`/teach`**: learn a concept over multiple sessions, using the current directory as a stateful workspace.
 - **`/ui-shape`**: plan UX/UI layouts, visual hierarchy, and component seams before writing production frontend code.
-- **`/ui-review`**: audit existing interface code against usability heuristics and 59 deterministic detector rules, returning prioritized P0-P3 findings.
+- **`/ui-review`**: audit existing interface code against usability heuristics and 75 deterministic detector rules, returning prioritized P0-P3 findings.
 - **`/ui-polish`**: repair, refine, and perfect existing UI and styles directly based on your prompt, applying targeted directional playbooks.
 - **`/writing-for-agents`** is the reference for writing documents agents consume: skills, AGENTS.md, pointed-at docs.
 

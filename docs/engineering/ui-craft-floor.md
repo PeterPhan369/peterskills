@@ -26,7 +26,7 @@ The craft floor establishes explicit boundaries across five core dimensions:
 * **Depth and shadows**: Shadows must carry an explicit vertical offset and soft diffusion. Zero-offset chromatic glowing halos and heavy opaque shadows are rejected.
 * **Interaction completeness**: Every interactive control must provide distinct hover, active, focus-visible, and disabled states. Focus outlines may never be removed without an accessible replacement.
 
-The skill houses an exhaustive catalog of 59 deterministic detector rules in its reference files, providing concrete definitions and code remediations for recognizable AI tells such as side-tab accent stripes, nested cards, gradient text, and overused typefaces.
+The skill houses an exhaustive catalog of 75 deterministic detector rules in its reference files, providing concrete definitions and code remediations for recognizable AI tells such as kickers/eyebrows, ghost cards, decorative gridlines, side-tab accent stripes, nested cards, gradient text, and overused typefaces.
 
 ## Common questions
 

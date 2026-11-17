@@ -1,2 +1,5 @@
 node_modules
 .claude
+.scratch/
+docs/agents/issue-tracker.md
+docs/agents/domain.md

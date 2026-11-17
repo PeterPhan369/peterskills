@@ -1,6 +1,6 @@
 ---
 name: ui-review
-description: Comprehensive UI/UX design review evaluating interface code against usability heuristics and 59 deterministic detector rules.
+description: Comprehensive UI/UX design review evaluating interface code against usability heuristics and 75 deterministic detector rules.
 disable-model-invocation: true
 ---
 
@@ -33,11 +33,11 @@ Examine the code along two independent axes:
   - Does the page have an obvious visual hierarchy where the most important action or message commands attention?
   - Is information grouped logically with clear proximity and breathing room?
   - Are interaction states complete (hover, active, focus, disabled, loading, empty, and error)?
-  - Is the reading measure constrained to 55–75 characters per line?
+  - Is the reading measure constrained to 55 to 75 characters per line?
   - Does the layout scale gracefully down to 320px mobile viewports without horizontal scrolling or broken elements?
 
 * **Axis 2: Deterministic Anti-Pattern Detection**:
-  - Audit against all 59 rules in `DETECTOR-RULES.md`.
+  - Audit against all 75 rules in `DETECTOR-RULES.md`.
   - Check for AI tells: `side-tab`, `border-accent-on-rounded`, `nested-cards`, `gradient-text`, `ai-color-palette`, `overused-font`, `monotonous-spacing`.
   - Check contrast: verify that body text achieves at least 4.5:1 contrast against its background (`text-contrast`, `gray-on-color`).
   - Check focus management: ensure interactive controls maintain visible focus rings (`missing-focus-ring`).
@@ -86,6 +86,6 @@ Format the report using this structure:
 The review is complete when:
 
 1. All target components and associated styles have been inspected.
-2. Both axes (Usability & Heuristics, 59 Detector Rules) have been evaluated exhaustively.
+2. Both axes (Usability and Heuristics, 75 Detector Rules) have been evaluated exhaustively.
 3. Every finding includes the specific file location, the rule ID, and actionable remediation advice.
 4. The findings are categorized into clear P0, P1, P2, and P3 priority tiers.

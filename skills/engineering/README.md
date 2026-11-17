@@ -16,7 +16,7 @@ Reachable only when you type them (Claude Code: `disable-model-invocation: true`
 - **[implement](./implement/SKILL.md)**: Build the work described by a spec or set of tickets, driving `/tdd` at pre-agreed seams and closing out with `/code-review` before committing.
 - **[implement-spec](./implement-spec/SKILL.md)**: Implement a whole spec on one integration branch. Works the tickets as a task graph, running implementer subagents across the ready frontier for maximum concurrency, then closes out with `/code-review`.
 - **[ui-polish](./ui-polish/SKILL.md)**: Repair, refine, and perfect frontend UI and styles in an existing project based on user instructions.
-- **[ui-review](./ui-review/SKILL.md)**: Comprehensive UI/UX design review evaluating interface code against usability heuristics and 59 deterministic detector rules.
+- **[ui-review](./ui-review/SKILL.md)**: Comprehensive UI/UX design review evaluating interface code against usability heuristics and 75 deterministic detector rules.
 - **[ui-shape](./ui-shape/SKILL.md)**: Plan, structure, and wireframe UX/UI layouts, component boundaries, and states before writing production frontend code.
 - **[wayfinder](./wayfinder/SKILL.md)**: Plan a huge chunk of work (more than one agent session can hold) as a shared map of decision tickets on the issue tracker, resolved one at a time until the way to the destination is clear.
 - **[retro](./retro/SKILL.md)**: Suggest improvements to the coding agent's environment (navigation, automated checks, coding standards, steering files, tooling) after a session, most severe first.

@@ -10,7 +10,7 @@
 
 # Skills For Real Engineers
 
-[![skills.sh](https://skills.sh/b/mattpocock/skills)](https://skills.sh/mattpocock/skills)
+[![skills.sh](https://skills.sh/b/PeterPhan369/peterskills)](https://skills.sh/PeterPhan369/peterskills)
 
 My agent skills that I use every day to do real engineering - not vibe coding.
 
@@ -24,7 +24,7 @@ If you want to keep up with changes to these skills, and any new ones I create, 
 
 ## Installation (30-second setup)
 
-A plugin updates itself. [skills.sh](https://skills.sh/mattpocock/skills) copies editable files into your project, and you update them by hand. Pick one per agent, because installing both gives you every skill twice.
+A plugin updates itself. [skills.sh](https://skills.sh/PeterPhan369/peterskills) copies editable files into your project, and you update them by hand. Pick one per agent, because installing both gives you every skill twice.
 
 ### 1. Get the skills
 
@@ -32,7 +32,8 @@ A plugin updates itself. [skills.sh](https://skills.sh/mattpocock/skills) copies
 <summary><strong>Claude Code</strong></summary>
 
 ```bash
-claude plugin install mattpocock-skills@claude-plugins-official
+claude plugin marketplace add PeterPhan369/peterskills
+claude plugin install mattpocock-skills@mattpocock
 ```
 
 Updates itself by default.
@@ -43,7 +44,7 @@ Updates itself by default.
 <summary><strong>Codex</strong></summary>
 
 ```bash
-codex plugin marketplace add mattpocock/skills
+codex plugin marketplace add PeterPhan369/peterskills
 codex plugin add mattpocock-skills@mattpocock
 ```
 
@@ -55,7 +56,7 @@ Updates itself at startup.
 <summary><strong>GitHub Copilot</strong> (CLI and VS Code)</summary>
 
 ```bash
-copilot plugin marketplace add mattpocock/skills
+copilot plugin marketplace add PeterPhan369/peterskills
 copilot plugin install mattpocock-skills@mattpocock
 ```
 
@@ -64,12 +65,12 @@ Then, once, add to `~/.copilot/settings.json`:
 ```json
 {
   "extraKnownMarketplaces": {
-    "mattpocock": { "source": { "source": "github", "repo": "mattpocock/skills" }, "autoUpdate": true }
+    "mattpocock": { "source": { "source": "github", "repo": "PeterPhan369/peterskills" }, "autoUpdate": true }
   }
 }
 ```
 
-In VS Code, run **Chat: Install Plugin From Source** and enter `https://github.com/mattpocock/skills`. It updates daily.
+In VS Code, run **Chat: Install Plugin From Source** and enter `https://github.com/PeterPhan369/peterskills`. It updates daily.
 
 </details>
 
@@ -77,8 +78,8 @@ In VS Code, run **Chat: Install Plugin From Source** and enter `https://github.c
 <summary><strong>Gemini CLI</strong> (manual updates)</summary>
 
 ```bash
-gemini skills install https://github.com/mattpocock/skills.git --path skills/engineering
-gemini skills install https://github.com/mattpocock/skills.git --path skills/productivity
+gemini skills install https://github.com/PeterPhan369/peterskills.git --path skills/engineering
+gemini skills install https://github.com/PeterPhan369/peterskills.git --path skills/productivity
 ```
 
 Re-run both commands to update.
@@ -89,7 +90,7 @@ Re-run both commands to update.
 <summary><strong>Any other agent, or editable files</strong> (manual updates)</summary>
 
 ```bash
-npx skills@latest add mattpocock/skills -a <agent>  # cursor, opencode, devin, windsurf, amp, pi; omit -a to choose
+npx skills@latest add PeterPhan369/peterskills -a <agent>  # cursor, opencode, devin, windsurf, amp, pi; omit -a to choose
 ```
 
 When the installer asks which skills to take, include `setup-matt-pocock-skills`. To update, run `npx skills@latest update`, and re-run `add` to pick up new skills.
@@ -226,7 +227,7 @@ Skills I use daily for code work.
 - **[implement](./skills/engineering/implement/SKILL.md)**: Build the work described by a spec or set of tickets, driving `/tdd` at pre-agreed seams and closing out with `/code-review` before committing.
 - **[implement-spec](./skills/engineering/implement-spec/SKILL.md)**: Implement a whole spec on one integration branch. Works the tickets as a task graph, running implementer subagents across the ready frontier for maximum concurrency, then closes out with `/code-review`.
 - **[ui-polish](./skills/engineering/ui-polish/SKILL.md)**: Repair, refine, and perfect frontend UI and styles in an existing project based on user instructions.
-- **[ui-review](./skills/engineering/ui-review/SKILL.md)**: Comprehensive UI/UX design review evaluating interface code against usability heuristics and 59 deterministic detector rules.
+- **[ui-review](./skills/engineering/ui-review/SKILL.md)**: Comprehensive UI/UX design review evaluating interface code against usability heuristics and 75 deterministic detector rules.
 - **[ui-shape](./skills/engineering/ui-shape/SKILL.md)**: Plan, structure, and wireframe UX/UI layouts, component boundaries, and states before writing production frontend code.
 - **[wayfinder](./skills/engineering/wayfinder/SKILL.md)**: Plan a huge chunk of work, more than one agent session can hold, as a shared map of decision tickets on the issue tracker, and resolve them one at a time until the way to the destination is clear.
 - **[retro](./skills/engineering/retro/SKILL.md)**: Suggest improvements to the coding agent's environment (navigation, automated checks, coding standards, steering files, tooling) after a session, most severe first.

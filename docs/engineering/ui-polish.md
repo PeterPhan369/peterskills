@@ -35,7 +35,7 @@ The skill matches your prompt against eight targeted directional playbooks:
 No. The skill preserves existing functionality, data models, and domain copy unless you explicitly instruct it to revise the text. Its focus is visual hierarchy, styling architecture, and accessibility.
 
 **What happens if I give a generic prompt like "polish this page"?**
-When no specific direction is requested, the skill runs its inspection pass against the 59 detector rules, resolves all detected anti-patterns, and applies the Harden playbook to ensure complete interaction states and responsive robustness.
+When no specific direction is requested, the skill runs its inspection pass against the 75 detector rules, resolves all detected anti-patterns, and applies the Harden playbook to ensure complete interaction states and responsive robustness.
 
 ## It's working if
 

@@ -28,6 +28,14 @@ Every skill that dispatches a subagent says to start it with a fresh context win
 
 ## Agent skills
 
+### Issue tracker
+
+Issues and specs live as local markdown files under `.scratch/`. See `docs/agents/issue-tracker.md`.
+
 ### Triage labels
 
 Canonical names, unchanged. See `docs/agents/triage-labels.md`. Issues are judged against [`SCOPE.md`](./SCOPE.md).
+
+### Domain docs
+
+Single-context (`GLOSSARY.md` + `docs/adr/`). See `docs/agents/domain.md`.

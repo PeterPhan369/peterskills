@@ -1,6 +1,6 @@
 ## What it does
 
-Evaluates frontend code against usability heuristics and 59 deterministic detector rules. It audits markup, styles, components, and responsive behavior, returning a structured report with prioritized findings from P0 to P3.
+Evaluates frontend code against usability heuristics and 75 deterministic detector rules. It audits markup, styles, components, and responsive behavior, returning a structured report with prioritized findings from P0 to P3.
 
 The defining constraint is that it never modifies code directly: it produces an objective, actionable diagnosis with file locations, rule identifiers, and suggested code diffs so you can decide how to proceed.
 
@@ -8,7 +8,7 @@ The defining constraint is that it never modifies code directly: it produces an 
 
 You invoke this by typing `/ui-review`, and the agent won't reach for it on its own.
 
-Reach for this when you want an audit of a page, PR, or component to evaluate visual quality, verify accessibility, or check for AI tells before shipping. To actively edit and repair the code, use [ui-polish](https://aihero.dev/skills-ui-review) instead. For general code standards and spec compliance, use [code-review](https://aihero.dev/skills-code-review).
+Reach for this when you want an audit of a page, PR, or component to evaluate visual quality, verify accessibility, or check for AI tells before shipping. To actively edit and repair the code, use [ui-polish](https://aihero.dev/skills-ui-polish) instead. For general code standards and spec compliance, use [code-review](https://aihero.dev/skills-code-review).
 
 | Task | Skill |
 | --- | --- |
@@ -21,7 +21,7 @@ Reach for this when you want an audit of a page, PR, or component to evaluate vi
 The review evaluates interface code across two distinct axes:
 
 1. **Usability heuristics**: Evaluates visual hierarchy, spatial proximity, state completeness (hover, focus, disabled, loading, empty, error), line length constraints, and mobile layout robustness.
-2. **Deterministic anti-pattern detection**: Evaluates code against 59 deterministic rules covering slop tells (side-tab borders, nested cards, gradient headlines, overused fonts), color contrast failures, missing focus indicators, and touch target violations.
+2. **Deterministic anti-pattern detection**: Evaluates code against 75 deterministic rules covering slop tells (side-tab borders, nested cards, gradient headlines, overused fonts), color contrast failures, missing focus indicators, and touch target violations.
 
 Findings are organized into four explicit priority tiers:
 

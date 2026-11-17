@@ -53,14 +53,17 @@ Use when the interface has accumulated clutter, unnecessary wrapper cards, redun
    - Eliminate nested cards and redundant outer card wrappers.
    - Remove background containers where text can sit directly on the primary canvas.
    - Strip decorative icons that merely repeat the text beside them.
+   - Resolve ghost cards: if a card has a visible border, remove its wide diffuse shadow; if it has a shadow, remove its 1px border. Pick one bounding mechanism.
 
-2. **Trim redundant copy**:
-   - Remove kickers and category labels that restate what the headline already says.
+2. **Trim redundant copy and kickers**:
+   - Remove kickers, eyebrows, and uppercase pill category labels above section titles (for example: "WHY CHOOSE US" or "FEATURES"). Lead directly with the headline.
    - Rewrite verbose button labels to direct, concise action verbs.
    - Consolidate repetitive helper copy into intuitive placeholder or tooltip text.
 
-3. **Prune decorative elements**:
-   - Remove floating blurred gradient spots, artificial divider shapes, and decorative background geometry.
+3. **Prune decorative filler**:
+   - Remove decorative gridlines, dot grids, repeating diagonal stripe gradients, and artificial divider shapes.
+   - Eliminate fake sketch-style SVGs and simulated grain/noise filters (`feTurbulence`).
+   - Remove floating blurred gradient spots and decorative background geometry.
    - Focus the user's eye exclusively on actionable data, clear controls, and core content.
 
 ---
@@ -94,10 +97,11 @@ Use when typography feels sloppy, hard to read, generic, or poorly scaled.
    - Set body line-height between 1.5 and 1.6 for comfortable reading; tighten display headings to 1.15 to 1.25.
    - Constrain reading paragraphs to 65ch maximum width to prevent eye fatigue.
 
-3. **Refine details**:
-   - Enable `text-wrap: balance` on multiline display titles.
+3. **Refine details and copy cadence**:
+   - Enable `text-wrap: balance` on multiline display titles and `text-wrap: pretty` on paragraphs to prevent single-word stragglers or orphan lines.
    - Apply `tabular-nums` on numeric columns, timers, and metrics.
-   - Tighten tracking on large display headings (`letter-spacing: -0.02em` to `-0.03em`) and loosen tracking slightly on small uppercase labels (`letter-spacing: 0.05em`).
+   - Tighten tracking on large display headings (`letter-spacing: -0.02em` to `-0.03em`), but never tighter than `-0.04em` (preserve the negative tracking floor). Loosen tracking slightly on small uppercase labels (`letter-spacing: 0.05em`).
+   - Eliminate AI marketing cadence: replace breathless aphorisms ("Built for X. Designed for Y.", "Simple, yet powerful") and empty buzzwords ("supercharge", "unleash", "elevate", "seamless") with plain, concrete technical statements.
 
 ---
 
@@ -136,12 +140,15 @@ Use when transitions feel abrupt, jarring, or, conversely, over-animated and slu
 
 Use to ensure the interface is production-ready, resilient, accessible, and robust.
 
-1. **Cover all component states**:
+1. **Cover all component states and failure modes**:
    - Implement dedicated states for every interactive component: hover, active, focus-visible, loading, disabled, and empty.
    - Ensure form fields display clear, accessible error messages with distinct border contrast and `aria-invalid`.
+   - Guard against broken images with fallback UI, placeholder backgrounds, or `alt` attributes.
 
-2. **Prevent layout breakage**:
+2. **Prevent layout breakage and clipping**:
    - Add `break-words` or text truncation (`truncate`) to dynamic data fields that might contain long strings (such as usernames, emails, or URLs).
+   - Ensure scrollable containers do not inadvertently clip drop-shadows, dropdown menus, or tooltips with accidental `overflow: hidden`.
+   - Prevent edge-flush cards: guarantee adequate margin/padding between cards and outer viewport edges on small screens.
    - Provide explicit width, height, or aspect-ratio on all images to eliminate layout shifts (CLS).
 
 3. **Guarantee accessibility and touch targets**:
