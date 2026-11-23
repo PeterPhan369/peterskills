@@ -38,6 +38,8 @@
     "./skills/engineering/code-review",
     "./skills/engineering/pr",
     "./skills/engineering/retro",
+    "./skills/engineering/backend-security-floor",
+    "./skills/engineering/security-review",
     "./skills/engineering/ui-craft-floor",
     "./skills/engineering/ui-polish",
     "./skills/engineering/ui-review",
