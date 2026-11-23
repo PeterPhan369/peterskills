@@ -18,11 +18,20 @@ A `wayfinder` unit: a child **Issue** of a `wayfinder:map` holding a *question* 
 **Triage role**:
 A canonical state-machine label applied to an **Issue** during triage (e.g. `needs-triage`, `ready-for-afk`). Each role maps to a real label string in the **Issue tracker** via `docs/agents/triage-labels.md`.
 
+**Stack profile**:
+The per-repo engineering domain (`frontend` or `backend`) selected during setup that determines which **Quality floor** and domain skills are active in that repository.
+_Avoid_: coding aspect, skillset mode, domain mode
+
+**Quality floor**:
+A domain-specific baseline standard and detector catalog (UI craft for `frontend`, security and fail-secure design for `backend`) that sets the minimum bar for code written or reviewed in a **Stack profile**.
+_Avoid_: embedded rules, rule pack, baseline rules
+
 ## Relationships
 
 - An **Issue tracker** holds many **Issues**
 - An **Issue** carries one **Triage role** at a time
 - A **Decision ticket** is an **Issue** (a child of a `wayfinder:map`)
+- A **Stack profile** activates one **Quality floor**
 
 ## Flagged ambiguities
 
