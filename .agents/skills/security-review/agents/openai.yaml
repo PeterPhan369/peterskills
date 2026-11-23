@@ -1,0 +1,5 @@
+interface:
+  display_name: "Security Review"
+  short_description: "Adversarial backend security audit with refutation gate"
+policy:
+  allow_implicit_invocation: false
