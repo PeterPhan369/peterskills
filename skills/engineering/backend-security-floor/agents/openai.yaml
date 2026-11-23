@@ -1,0 +1,5 @@
+interface:
+  display_name: "Backend Security Floor"
+  short_description: "Fail-secure backend standards and language sharp-edge rules"
+policy:
+  allow_implicit_invocation: false
