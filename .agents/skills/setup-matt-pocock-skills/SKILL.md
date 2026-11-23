@@ -1,6 +1,6 @@
 ---
 name: setup-matt-pocock-skills
-description: "Configure this repo for the engineering skills: set up its issue tracker, triage label vocabulary, and domain doc layout. Run once before first use of the other engineering skills."
+description: "Configure this repo for the engineering skills: set up its issue tracker, triage label vocabulary, domain doc layout, and Stack profile quality floor. Run once before first use of the other engineering skills."
 disable-model-invocation: true
 ---
 
@@ -11,6 +11,7 @@ Scaffold the per-repo configuration that the engineering skills assume:
 - **Issue tracker**: where issues live (GitHub by default; local markdown is also supported out of the box)
 - **Triage labels**: the strings used for the five canonical triage roles
 - **Domain docs**: where `GLOSSARY.md` and ADRs live, and the consumer rules for reading them
+- **Stack profile**: `frontend` or `backend`, seeding `docs/agents/quality-floor.md` (and compiled `docs/agents/security-rules.md` for `backend`)
 
 This is a prompt-driven skill, not a deterministic script. Explore, present what you found, confirm with the user, then write.
 
@@ -24,16 +25,31 @@ Look at the current repo to understand its starting state. Read whatever exists;
 - `AGENTS.md` and `CLAUDE.md` at the repo root: does either exist? Is there already an `## Agent skills` section in either?
 - `GLOSSARY.md` and `GLOSSARY-MAP.md` at the repo root, and the legacy `CONTEXT.md` / `CONTEXT-MAP.md`. If a legacy file exists, offer to `git mv` it to its `GLOSSARY` name and rewrite those names in `docs/agents/domain.md`.
 - `docs/adr/` and any `src/*/docs/adr/` directories
-- `docs/agents/`: does this skill's prior output already exist?
+- `docs/agents/`: does this skill's prior output (`issue-tracker.md`, `domain.md`, `quality-floor.md`, `security-rules.md`) already exist?
 - `.scratch/`: a sign that a local-markdown issue tracker convention is already in use
 - Is the `triage` skill installed? (a `triage` skill folder alongside this one, or `triage` in your available skills.) This decides whether Section B runs at all.
 - Monorepo signals: a `pnpm-workspace.yaml`, a `workspaces` field in `package.json`, or a populated `packages/*` with its own `src/`. These are present only in a genuinely large multi-package repo; their absence means single-context, which is almost every repo.
+- **Stack profile** signals from root manifest filenames (inspect filenames and top-level layout first at near-zero token cost; only check `package.json` dependencies or `build.gradle*` if needed to disambiguate):
+  - `frontend` signals: `next.config.*`, `vite.config.*`, `astro.config.*`, `svelte.config.*`, `nuxt.config.*`, `remix.config.*`, `angular.json`, `tailwind.config.*`, or `package.json` with frontend UI frameworks (`react`, `vue`, `svelte`, `solid-js`, `next`, `@angular/core`) and no server framework.
+  - `backend` signals across the 11 supported languages:
+    - `c-cpp` (C / C++): `CMakeLists.txt`, `Makefile`, `meson.build`, `conanfile.txt`, `conanfile.py`, `vcpkg.json`
+    - `csharp` (C# / .NET): `*.csproj`, `*.sln`, `*.slnx`, `global.json`, `Directory.Build.props`
+    - `go` (Go): `go.mod`, `go.sum`
+    - `java` (Java): `pom.xml`, `build.gradle`, `settings.gradle`
+    - `javascript-typescript` (JavaScript / TypeScript): `package.json`, `tsconfig.json`, `deno.json`, `bun.lock`, `bun.lockb` paired with server/API entrypoints or backend frameworks
+    - `kotlin` (Kotlin): `build.gradle.kts`, `settings.gradle.kts`, or Kotlin sources (`src/**/*.kt`)
+    - `php` (PHP): `composer.json`, `composer.lock`, `artisan`
+    - `python` (Python): `pyproject.toml`, `requirements.txt`, `setup.py`, `Pipfile`, `poetry.lock`, `uv.lock`
+    - `ruby` (Ruby): `Gemfile`, `Gemfile.lock`, `Rakefile`, `config.ru`
+    - `rust` (Rust): `Cargo.toml`, `Cargo.lock`
+    - `swift` (Swift): `Package.swift`, `*.xcodeproj`, `*.xcworkspace`
+- Local skill directories in the target repo: check whether `.claude/skills/` or `.agents/skills/` exists inside this repository, and note the installed `backend-security-floor` directory path alongside this skill for reading `SECURITY-RULES.md` and `lang/*.md`.
 
 ### 2. Present findings and ask
 
 Summarise what's present and what's missing. Then take the sections in order. One section, one answer, then the next.
 
-Lead each section with the recommended answer so the user can accept it in a word. Give a one-line explainer only when the choice genuinely branches; skip the section entirely when exploration already settled it (Section B when `triage` isn't installed, Section C when there's no monorepo).
+Lead each section with the recommended answer so the user can accept it in a word. Give a one-line explainer only when the choice genuinely branches; skip the section entirely when exploration already settled it (Section B when `triage` isn't installed, Section C when there's no monorepo; always confirm Section D).
 
 **Section A: Issue tracker.**
 
@@ -62,12 +78,24 @@ The defaults are the five canonical roles, each label string equal to its name: 
 
 Offer **multi-context** (a root `GLOSSARY-MAP.md` pointing to per-context `GLOSSARY.md` files) only when exploration found monorepo signals. Then confirm which layout they want.
 
+**Section D: Stack profile.**
+
+> Explainer: A **Stack profile** (`frontend` or `backend`) picks the single **Quality floor** seeded into `docs/agents/quality-floor.md` and pointed to from your instruction file, so sessions never spend context on the opposite domain.
+
+Lead with the recommended profile from Step 1 (`frontend` or `backend`) and confirm:
+
+- `frontend`: seeds the frontend UI craft **Quality floor** into `docs/agents/quality-floor.md`.
+- `backend`: seeds the backend security **Quality floor** into `docs/agents/quality-floor.md` and compiles `docs/agents/security-rules.md` for your target language(s).
+
+When `backend` is selected, present the language(s) detected in Step 1 and ask the user to confirm or adjust which language pack(s) apply from the 11 supported options: `c-cpp` (C / C++), `csharp` (C# / .NET), `go` (Go), `java` (Java), `javascript-typescript` (JS / TS), `kotlin` (Kotlin), `php` (PHP), `python` (Python), `ruby` (Ruby), `rust` (Rust), `swift` (Swift).
+
 ### 3. Confirm and edit
 
 Show the user a draft of:
 
-- The `## Agent skills` block to add to whichever of `CLAUDE.md` / `AGENTS.md` is being edited (see step 4 for selection rules)
-- The contents of `docs/agents/issue-tracker.md`, `docs/agents/domain.md`, and `docs/agents/triage-labels.md` (the last only when `triage` is installed)
+- The `## Agent skills` block to add to whichever of `CLAUDE.md` / `AGENTS.md` is being edited (including `### Quality floor`; see step 4 for selection rules)
+- The contents of `docs/agents/issue-tracker.md`, `docs/agents/domain.md`, `docs/agents/triage-labels.md` (when `triage` is installed), `docs/agents/quality-floor.md`, and `docs/agents/security-rules.md` (when `backend` is selected)
+- If `.claude/skills/` or `.agents/skills/` exists inside the target repo, the list of unselected domain skill folders and unselected `lang/*.md` files queued for local pruning
 
 Let them edit before writing.
 
@@ -99,9 +127,15 @@ The block:
 ### Domain docs
 
 [one-line summary of layout: "single-context" or "multi-context"]. See `docs/agents/domain.md`.
+
+### Quality floor
+
+[one-line summary: "`frontend` UI craft floor" or "`backend` security floor (<confirmed languages>)"]. See `docs/agents/quality-floor.md`[ and `docs/agents/security-rules.md` for `backend`].
 ```
 
 Include the `### Triage labels` sub-block, and write `docs/agents/triage-labels.md`, only when `triage` is installed and Section B ran. When it isn't, both are omitted.
+
+In `### Quality floor`, point to `docs/agents/quality-floor.md`, and add `and \`docs/agents/security-rules.md\`` when `backend` is selected (omit `security-rules.md` for `frontend`).
 
 When Section B ran on GitHub or GitLab, create each configured label the tracker lacks (`gh label create` / `glab label create`).
 
@@ -112,9 +146,22 @@ Then write the docs files using the seed templates in this skill folder as a sta
 - [issue-tracker-local.md](./issue-tracker-local.md): local-markdown issue tracker
 - [triage-labels.md](./triage-labels.md): label mapping (only if `triage` is installed)
 - [domain.md](./domain.md): domain doc consumer rules + layout
+- [quality-floor-frontend.md](./quality-floor-frontend.md): frontend Quality floor written to `docs/agents/quality-floor.md` (when `frontend` is selected)
+- [quality-floor-backend.md](./quality-floor-backend.md): backend Quality floor written to `docs/agents/quality-floor.md` (when `backend` is selected)
 
 For "other" issue trackers, write `docs/agents/issue-tracker.md` from scratch using the user's description.
 
+**Compile `docs/agents/security-rules.md` (`backend` only):**
+
+- Read `backend-security-floor/SECURITY-RULES.md` and ONLY the user's confirmed `lang/<lang>.md` pack(s) directly as plain files from the installed `backend-security-floor` folder alongside this skill.
+- Combine the core rules from `SECURITY-RULES.md` with ONLY the confirmed `lang/<lang>.md` pack(s) into `docs/agents/security-rules.md`. Exclude all unselected language packs.
+
+**Prune local skill directories (only when `.claude/skills/` or `.agents/skills/` exists inside the target repo):**
+
+- Scope deletion strictly to local `.claude/skills/` and `.agents/skills/` directories inside the target repo; never delete files from global user directories (`~/.claude/skills/`, `~/.agents/skills/`) or plugin caches.
+- When `backend` is selected: delete the unselected frontend skill folders (`ui-craft-floor`, `ui-review`, `ui-polish`, `ui-shape`) from any local `.claude/skills/` or `.agents/skills/` directory, and inside any local `backend-security-floor/lang/` directory delete every unselected `lang/*.md` file so only confirmed language packs remain.
+- When `frontend` is selected: delete the unselected backend skill folders (`backend-security-floor`, `security-review`) from any local `.claude/skills/` or `.agents/skills/` directory.
+
 ### 5. Done
 
-Tell the user the setup is complete and which engineering skills will now read from these files. Mention they can edit `docs/agents/*.md` directly later; re-running this skill is only necessary if they want to switch issue trackers or restart from scratch.
+Tell the user the setup is complete and which engineering skills will now read from these files (including the active **Quality floor**). Mention they can edit `docs/agents/*.md` directly later; re-running this skill is only necessary if they want to switch issue trackers, change **Stack profile** or languages, or restart from scratch.
