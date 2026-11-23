@@ -6,7 +6,7 @@ It recommends and stops. It does not grill, write a [spec](https://www.aihero.de
 
 ## When to reach for it
 
-You invoke this by typing `/ask-matt`; the agent won't reach for it on its own.
+You invoke this by typing `/ask-matt`; the [agent](https://www.aihero.dev/ai-coding-dictionary/agent) won't reach for it on its own.
 
 | Your situation | What the router gives back |
 | --- | --- |
@@ -14,7 +14,7 @@ You invoke this by typing `/ask-matt`; the agent won't reach for it on its own.
 | Bugs and requests arriving from other people | The [triage](https://aihero.dev/skills-triage) on-ramp, and why [tickets](https://www.aihero.dev/ai-coding-dictionary/ticket) you generated yourself don't belong on it |
 | Two skills that look interchangeable | The line between them, and it is usually one concrete test rather than a matter of taste. [grill-me](https://aihero.dev/skills-grill-me) or [grill-with-docs](https://aihero.dev/skills-grill-with-docs) turns on whether you are in a working directory; [grill-with-docs](https://aihero.dev/skills-grill-with-docs) or [wayfinder](https://aihero.dev/skills-wayfinder) turns on whether the effort fits one session |
 | A long session and a decision about the [context](https://www.aihero.dev/ai-coding-dictionary/context) | The ordered tree over the five options at a phase boundary |
-| Frontend or backend work, and unsure which quality or review skill fits | Routes by your **Stack profile** (`frontend` or `backend`) across shaping, prototyping, review, and polish steps |
+| Frontend or backend work, and unsure which quality or review skill fits | Routes by your **Stack profile** (`frontend` or `backend`) across shaping, [prototyping](https://www.aihero.dev/ai-coding-dictionary/prototyping), review, and polish steps |
 | A skill you have already picked | Nothing useful. Invoke that skill directly. |
 
 ## Prerequisites

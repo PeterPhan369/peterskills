@@ -2,38 +2,24 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import {
+  assertDocsCompliance,
+  collectFilesRecursive,
+  extractFrontmatter,
+  normalizeNewlines,
+} from './helpers.mjs';
 
 const SKILL_DIR = path.resolve('skills/engineering/security-review');
 const MIRROR_DIR = path.resolve('.agents/skills/security-review');
 const DOCS_PATH = path.resolve('docs/engineering/security-review.md');
 const TEST_PATH = path.resolve('tests/security-review.test.mjs');
 
-function normalizeNewlines(text) {
-  return text.replace(/\r\n/g, '\n');
-}
-
-function collectFilesRecursive(dir) {
-  const results = [];
-  if (!fs.existsSync(dir)) return results;
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      results.push(...collectFilesRecursive(full));
-    } else {
-      results.push(full);
-    }
-  }
-  return results;
-}
-
 test('security-review: SKILL.md frontmatter and openai.yaml enforce user-only invocation', () => {
   const skillPath = path.join(SKILL_DIR, 'SKILL.md');
   assert.ok(fs.existsSync(skillPath), 'skills/engineering/security-review/SKILL.md must exist');
   const skillContent = fs.readFileSync(skillPath, 'utf8');
 
-  const fmMatch = skillContent.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-  assert.ok(fmMatch, 'SKILL.md must begin with YAML frontmatter');
-  const fm = fmMatch[1];
+  const fm = extractFrontmatter(skillContent, skillPath);
 
   assert.match(fm, /^name:\s*security-review\s*$/m, 'Frontmatter must set name: security-review');
   assert.match(fm, /^disable-model-invocation:\s*true\s*$/m, 'Frontmatter must set disable-model-invocation: true');
@@ -76,9 +62,40 @@ test('security-review: reads repo quality floor and security rules with fallback
     'SKILL.md must not instruct calling the Skill tool on backend-security-floor'
   );
 
+  assert.doesNotMatch(
+    skillContent,
+    /\bbaseline\s+rules\b/i,
+    'SKILL.md must not contain avoided glossary synonym "baseline rules"'
+  );
+  assert.doesNotMatch(
+    skillContent,
+    /\.\.\/backend-security-floor\//,
+    'SKILL.md must not contain deep relative ../backend-security-floor/ markdown cross-links'
+  );
+
+  assert.match(
+    skillContent,
+    /^##\s+1\.\s+Load the Active Quality Floor\s*$/m,
+    'Step 1 heading must use Quality floor instead of Baseline Rules'
+  );
+  assert.match(skillContent, /active\s+\*\*Quality floor\*\*/i, 'SKILL.md must refer to active Quality floor');
+  assert.match(
+    skillContent,
+    /primary external references/i,
+    'Step 1 must name repo quality-floor.md and security-rules.md as primary external references'
+  );
   assert.match(skillContent, /docs\/agents\/quality-floor\.md/, 'SKILL.md must read docs/agents/quality-floor.md');
   assert.match(skillContent, /docs\/agents\/security-rules\.md/, 'SKILL.md must read docs/agents/security-rules.md');
-  assert.match(skillContent, /\.\.\/backend-security-floor\/SKILL\.md/, 'SKILL.md must fall back to ../backend-security-floor/SKILL.md');
+  assert.match(
+    skillContent,
+    /\/setup-matt-pocock-skills/,
+    'Step 1 must tell the user /setup-matt-pocock-skills creates missing repo files'
+  );
+  assert.match(
+    skillContent,
+    /backend-security-floor[\s\S]*SKILL\.md/,
+    'SKILL.md must fall back directly to installed backend-security-floor SKILL.md in plain prose'
+  );
   assert.match(skillContent, /SECURITY-RULES\.md/, 'SKILL.md must reference SECURITY-RULES.md fallback');
   assert.match(skillContent, /lang\//, 'SKILL.md must reference matching lang/*.md files');
   assert.match(skillContent, /read-only|never edit|never modify/i, 'SKILL.md must declare read-only audit behavior');
@@ -133,6 +150,11 @@ test('security-review: spawns parallel fresh-context discovery sub-agents with z
     /fail\s+loudly|abort|scan-failed/i,
     'Zero-item scan guard must fail loudly rather than reporting a clean pass'
   );
+  assert.doesNotMatch(
+    skillContent,
+    /spawning\s+nested\s+agents|invoking\s+`?\/security-review`?/i,
+    'SKILL.md must not include out-of-scope subagent recursion guards'
+  );
 });
 
 test('security-review: enforces 5-step false-positive refutation gate and Rationalizations to Reject', () => {
@@ -161,6 +183,7 @@ test('security-review: output report template defines P0-P3 tiers, required evid
   const skillContent = fs.readFileSync(path.join(SKILL_DIR, 'SKILL.md'), 'utf8');
 
   const tiers = ['### P0', '### P1', '### P2', '### P3'];
+  const tierBlocks = [];
   for (let i = 0; i < tiers.length; i++) {
     const start = skillContent.indexOf(tiers[i]);
     assert.ok(start !== -1, `Output template must include ${tiers[i]}`);
@@ -168,53 +191,46 @@ test('security-review: output report template defines P0-P3 tiers, required evid
       ? skillContent.indexOf(tiers[i + 1], start)
       : skillContent.indexOf('## Refuted Candidates', start);
     assert.ok(end > start, `Output template section order must place ${tiers[i]} before the next section`);
-    const tierBlock = skillContent.slice(start, end);
-
-    assert.match(tierBlock, /Attacker Model/i, `${tiers[i]} template must include Attacker Model`);
-    assert.match(tierBlock, /Source-to-Sink/i, `${tiers[i]} template must include Source-to-Sink trace`);
-    assert.match(tierBlock, /Exploit Scenario/i, `${tiers[i]} template must include Exploit Scenario`);
-    assert.match(tierBlock, /Remediation/i, `${tiers[i]} template must include Remediation`);
-    assert.match(tierBlock, /```diff/i, `${tiers[i]} template must include a diff code fence for remediation`);
+    tierBlocks.push(skillContent.slice(start, end));
   }
 
-  assert.match(skillContent, /##\s+Refuted Candidates/i, 'Report template must include Refuted Candidates table');
+  const p0Block = tierBlocks[0];
+  assert.match(p0Block, /Attacker Model/i, '### P0 template must include Attacker Model');
+  assert.match(p0Block, /Source-to-Sink/i, '### P0 template must include Source-to-Sink trace');
+  assert.match(p0Block, /Exploit Scenario/i, '### P0 template must include Exploit Scenario');
+  assert.match(p0Block, /Remediation/i, '### P0 template must include Remediation');
+  assert.match(p0Block, /```diff/i, '### P0 template must include a diff code fence for remediation');
+
+  for (let i = 1; i < tiers.length; i++) {
+    assert.match(
+      tierBlocks[i],
+      /P0\s+(?:finding\s+)?schema|Attacker Model[\s\S]*Source-to-Sink[\s\S]*Exploit Scenario[\s\S]*Remediation/i,
+      `${tiers[i]} must concisely reference the P0 finding schema`
+    );
+    assert.doesNotMatch(
+      tierBlocks[i],
+      /```diff/i,
+      `${tiers[i]} must reference the P0 schema instead of repeating the diff fence block`
+    );
+  }
+
+  const refutedIdx = skillContent.indexOf('## Refuted Candidates');
+  const verdictIdx = skillContent.indexOf('## Verdict');
+  assert.ok(refutedIdx !== -1, 'Report template must include ## Refuted Candidates');
+  assert.ok(verdictIdx > refutedIdx, 'Report template must include ## Verdict after ## Refuted Candidates');
 });
 
 test('security-review: docs/engineering/security-review.md adheres strictly to .agents/writing-docs.md', () => {
   assert.ok(fs.existsSync(DOCS_PATH), 'docs/engineering/security-review.md must exist');
   const content = fs.readFileSync(DOCS_PATH, 'utf8');
 
-  assert.doesNotMatch(content, /^#\s+/m, 'Docs page must not contain an H1 heading');
-  assert.doesNotMatch(content, /\b(npx skills|claude plugin|codex plugin|gemini skills)\b/i, 'Docs page must not contain install commands');
-  assert.doesNotMatch(content, /skills\/engineering\//i, 'Docs page must not link to internal skill source files');
-  assert.doesNotMatch(content, /github\.com\/(mattpocock\/skills|PeterPhan369\/peterskills)/i, 'Docs page must not contain source repo links');
-
-  const proseOnly = content
-    .replace(/https?:\/\/[^\s)]+/g, '')
-    .replace(/`[^`]+`/g, '')
-    .replace(/\b(ask-matt|setup-matt-pocock-skills)\b/g, '');
-  assert.doesNotMatch(proseOnly, /\b(matt|pocock|peter)\b/i, 'Docs page must not name authors');
-
-  const links = [...content.matchAll(/\[[^\]]+\]\(([^)]+)\)/g)].map(m => m[1]);
-  assert.ok(links.length > 0, 'Docs page must contain links');
-  for (const href of links) {
-    assert.match(href, /^https:\/\//, `Every link in docs page must be absolute https://, found "${href}"`);
-  }
-
-  const requiredHeadings = [
+  assertDocsCompliance(content, 'docs/engineering/security-review.md', [
     '## What it does',
     '## When to reach for it',
     '## Common questions',
     "## It's working if",
     '## Where it fits',
-  ];
-  let lastIdx = -1;
-  for (const heading of requiredHeadings) {
-    const idx = content.indexOf(heading);
-    assert.ok(idx !== -1, `Docs page must include "${heading}"`);
-    assert.ok(idx > lastIdx, `Docs heading "${heading}" must appear in template order`);
-    lastIdx = idx;
-  }
+  ]);
 
   for (const requiredUrl of [
     'https://aihero.dev/skills-ask-matt',
@@ -226,6 +242,7 @@ test('security-review: docs/engineering/security-review.md adheres strictly to .
 
   assert.match(content, /\/security-review/, 'Docs page must document user-invoked /security-review command');
   assert.match(content, /won't reach for it on its own/i, 'Docs page must state user-only invocation boundary');
+  assert.doesNotMatch(content, /\bbaseline\s+rules\b/i, 'Docs page must not contain avoided glossary synonym "baseline rules"');
 });
 
 test('security-review: .agents/skills/security-review mirrors source files identically and zero em-dashes exist', () => {
@@ -247,8 +264,8 @@ test('security-review: .agents/skills/security-review mirrors source files ident
     );
   }
 
-  const actualSrcFiles = collectFilesRecursive(SKILL_DIR).map(p => path.relative(SKILL_DIR, p).replace(/\\/g, '/')).sort();
-  const actualMirrorFiles = collectFilesRecursive(MIRROR_DIR).map(p => path.relative(MIRROR_DIR, p).replace(/\\/g, '/')).sort();
+  const actualSrcFiles = collectFilesRecursive(SKILL_DIR, { relative: true });
+  const actualMirrorFiles = collectFilesRecursive(MIRROR_DIR, { relative: true });
   assert.deepStrictEqual(actualMirrorFiles, actualSrcFiles, 'Mirror directory must match source directory file set');
 
   const filesToScanForEmDash = [

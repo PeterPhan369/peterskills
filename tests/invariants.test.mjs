@@ -3,32 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { execSync } from 'node:child_process';
-
-const TOUCHED_AGENT_SKILLS = [
-  'ask-matt',
-  'ui-craft-floor',
-  'ui-polish',
-  'ui-review',
-  'ui-shape',
-  'backend-security-floor',
-  'security-review',
-  'setup-matt-pocock-skills',
-  'improve-codebase-architecture',
-];
-
-function collectFilesRecursive(dir, extensions) {
-  const results = [];
-  if (!fs.existsSync(dir)) return results;
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      results.push(...collectFilesRecursive(full, extensions));
-    } else if (extensions.some((ext) => entry.name.endsWith(ext))) {
-      results.push(full);
-    }
-  }
-  return results;
-}
+import { collectFilesRecursive, TOUCHED_AGENT_SKILLS } from './helpers.mjs';
 
 function listSubdirs(dir) {
   return fs
