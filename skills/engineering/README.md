@@ -15,6 +15,7 @@ Reachable only when you type them (Claude Code: `disable-model-invocation: true`
 - **[to-tickets](./to-tickets/SKILL.md)**: Break any plan, spec, or conversation into a set of tracer-bullet tickets, each declaring its blocking edges, whether as text in a local file or as native blocking links on a real tracker.
 - **[implement](./implement/SKILL.md)**: Build the work described by a spec or set of tickets, driving `/tdd` at pre-agreed seams and closing out with `/code-review` before committing.
 - **[implement-spec](./implement-spec/SKILL.md)**: Implement a whole spec on one integration branch. Works the tickets as a task graph, running implementer subagents across the ready frontier for maximum concurrency, then closes out with `/code-review`.
+- **[ui-craft-floor](./ui-craft-floor/SKILL.md)**: Shared standards and quality floor for frontend UI/UX design, preventing AI slop patterns and enforcing accessibility and contrast.
 - **[ui-polish](./ui-polish/SKILL.md)**: Repair, refine, and perfect frontend UI and styles in an existing project based on user instructions.
 - **[ui-review](./ui-review/SKILL.md)**: Comprehensive UI/UX design review evaluating interface code against usability heuristics and 75 deterministic detector rules.
 - **[ui-shape](./ui-shape/SKILL.md)**: Plan, structure, and wireframe UX/UI layouts, component boundaries, and states before writing production frontend code.
@@ -26,7 +27,6 @@ Reachable only when you type them (Claude Code: `disable-model-invocation: true`
 Model- or user-reachable (rich trigger phrasing so the model can reach for them).
 
 - **[prototype](./prototype/SKILL.md)**: Build a throwaway prototype to answer a design question: a single shareable HTML file for state/logic, or several toggleable UI variations.
-- **[ui-craft-floor](./ui-craft-floor/SKILL.md)**: Shared standards and quality floor for frontend UI/UX design, preventing AI slop patterns and enforcing accessibility and contrast.
 - **[diagnosing-bugs](./diagnosing-bugs/SKILL.md)**: Disciplined diagnosis loop for hard bugs and performance regressions: build a feedback loop that goes red on this bug → minimise → hypothesise → instrument → fix → regression-test.
 - **[research](./research/SKILL.md)**: Investigate a question against high-trust primary sources and capture the findings as a cited Markdown file in the repo, run as a background agent.
 - **[tdd](./tdd/SKILL.md)**: Test-driven development with a red-green-refactor loop. Builds features or fixes bugs one vertical slice at a time.

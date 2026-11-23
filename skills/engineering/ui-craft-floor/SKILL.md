@@ -1,6 +1,7 @@
 ---
 name: ui-craft-floor
-description: Shared standards and quality floor for frontend UI/UX design. Use whenever the agent writes, designs, prototypes, or modifies frontend UI, components, styles, or layouts. Prevents AI slop patterns, enforces accessibility and contrast, and maintains production craft.
+description: Shared standards and quality floor for frontend UI/UX design, preventing AI slop patterns and enforcing accessibility and contrast.
+disable-model-invocation: true
 ---
 
 # UI Craft Floor
