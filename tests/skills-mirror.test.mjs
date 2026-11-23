@@ -2,18 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-
-const TOUCHED_SKILLS = [
-  'ask-matt',
-  'ui-craft-floor',
-  'ui-polish',
-  'ui-review',
-  'ui-shape',
-  'backend-security-floor',
-  'security-review',
-  'setup-matt-pocock-skills',
-  'improve-codebase-architecture',
-];
+import { collectFilesRecursive, normalizeNewlines, TOUCHED_AGENT_SKILLS } from './helpers.mjs';
 
 const EXPECTED_EXTRA_FILES = {
   'ask-matt': ['PHASE-BOUNDARIES.md'],
@@ -45,33 +34,16 @@ const EXPECTED_EXTRA_FILES = {
   'improve-codebase-architecture': ['HTML-REPORT.md'],
 };
 
-function collectSkillFiles(baseDir, currentDir = baseDir) {
-  const files = [];
-  for (const entry of fs.readdirSync(currentDir, { withFileTypes: true })) {
-    const full = path.join(currentDir, entry.name);
-    if (entry.isDirectory()) {
-      files.push(...collectSkillFiles(baseDir, full));
-    } else if (entry.name.endsWith('.md') || entry.name.endsWith('.yaml')) {
-      files.push(path.relative(baseDir, full).replace(/\\/g, '/'));
-    }
-  }
-  return files.sort();
-}
-
-function normalizeNewlines(text) {
-  return text.replace(/\r\n/g, '\n');
-}
-
-test('skills mirror: .agents/skills recursively mirrors every .md and .yaml file for all 9 touched skills', () => {
-  for (const skill of TOUCHED_SKILLS) {
+test(`skills mirror: .agents/skills recursively mirrors every .md and .yaml file for all ${TOUCHED_AGENT_SKILLS.length} touched skills`, () => {
+  for (const skill of TOUCHED_AGENT_SKILLS) {
     const engDir = path.resolve('skills/engineering', skill);
     const agentDir = path.resolve('.agents/skills', skill);
 
     assert.ok(fs.existsSync(engDir), `skills/engineering/${skill} must exist`);
     assert.ok(fs.existsSync(agentDir), `.agents/skills/${skill} must exist`);
 
-    const engFiles = collectSkillFiles(engDir);
-    const agentFiles = collectSkillFiles(agentDir);
+    const engFiles = collectFilesRecursive(engDir, { extensions: ['.md', '.yaml'], relative: true });
+    const agentFiles = collectFilesRecursive(agentDir, { extensions: ['.md', '.yaml'], relative: true });
 
     assert.deepStrictEqual(
       agentFiles,

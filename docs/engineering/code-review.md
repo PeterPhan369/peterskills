@@ -21,7 +21,7 @@ You must supply the fixed point. If you do not, the skill asks for one rather th
 
 ## Prerequisites
 
-The Standards axis needs nothing. It reads whatever the repo documents (`CODING_STANDARDS.md`, `CONTRIBUTING.md`, and the like) and falls back on a built-in baseline when the repo documents nothing.
+The Standards axis needs nothing. It reads whatever the repo documents (`CODING_STANDARDS.md`, `CONTRIBUTING.md`, and the like) and falls back on a built-in baseline when the repo documents nothing. When configured via [setup-matt-pocock-skills](https://aihero.dev/skills-setup-matt-pocock-skills) (`/setup-matt-pocock-skills`), it also picks up your active **Quality floor** in `docs/agents/quality-floor.md` (and `docs/agents/security-rules.md` for `backend` repos), while ignoring installed skill directories (`.claude/skills/`, `.agents/skills/`) so an inactive domain's rules are never pulled in.
 
 The Spec axis needs a spec to exist and be findable. It looks in this order:
 

@@ -2,6 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import {
+  assertDocsCompliance,
+  AVOIDED_GLOSSARY_SYNONYMS,
+  collectFilesRecursive,
+  extractFrontmatter,
+  normalizeNewlines,
+  USER_INVOKED_DOMAIN_SKILLS,
+} from './helpers.mjs';
 
 const SETUP_DIR = path.resolve('skills/engineering/setup-matt-pocock-skills');
 const SETUP_MIRROR_DIR = path.resolve('.agents/skills/setup-matt-pocock-skills');
@@ -24,65 +32,6 @@ const EXPECTED_BACKEND_LANGS = [
   { slug: 'rust', manifestPattern: /Cargo\.toml/i },
   { slug: 'swift', manifestPattern: /Package\.swift/i },
 ];
-
-const USER_INVOKED_DOMAIN_SKILLS = [
-  'ui-craft-floor',
-  'ui-review',
-  'ui-polish',
-  'ui-shape',
-  'backend-security-floor',
-  'security-review',
-];
-
-const KNOWN_DICTIONARY_SLUGS = new Set([
-  'afk',
-  'agent',
-  'agent-mode',
-  'agents-md',
-  'automated-check',
-  'clearing',
-  'compaction',
-  'context',
-  'context-pointer',
-  'context-window',
-  'effort',
-  'environment',
-  'grilling',
-  'harness',
-  'human-in-the-loop',
-  'human-review',
-  'mcp',
-  'memory-system',
-  'model',
-  'parametric-knowledge',
-  'primary-source',
-  'progressive-disclosure',
-  'prototyping',
-  'secondary-source',
-  'session',
-  'skill',
-  'smart-zone',
-  'spec',
-  'stateful',
-  'stateless',
-  'subagent',
-  'ticket',
-  'token',
-  'tool',
-  'tool-call',
-  'turn',
-  'vibe-coding',
-]);
-
-function normalizeNewlines(text) {
-  return text.replace(/\r\n/g, '\n');
-}
-
-function extractFrontmatter(markdown, filePath) {
-  const match = markdown.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-  assert.ok(match, `${filePath} must begin with YAML frontmatter`);
-  return match[1];
-}
 
 function assertUserInvokedMetadata(skillDir, expectedName) {
   const skillPath = path.join(skillDir, 'SKILL.md');
@@ -112,72 +61,6 @@ function assertNoSkillToolOnUserInvoked(content, label) {
       `${label} must never instruct calling the Skill tool on user-invoked skill "${skill}"`
     );
   }
-}
-
-function collectFilesRecursive(dir) {
-  const files = [];
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    const rel = entry.name;
-    const full = path.join(dir, rel);
-    if (entry.isDirectory()) {
-      for (const child of collectFilesRecursive(full)) {
-        files.push(path.join(rel, child));
-      }
-    } else {
-      files.push(rel);
-    }
-  }
-  return files.sort();
-}
-
-function assertDocsCompliance(content, fileLabel, requiredHeadings) {
-  assert.doesNotMatch(content, /^#\s+/m, `${fileLabel} must not contain an H1 heading`);
-  assert.doesNotMatch(
-    content,
-    /\b(npx skills|claude plugin|codex plugin|gemini skills)\b/i,
-    `${fileLabel} must not contain install commands`
-  );
-  assert.doesNotMatch(content, /skills\/engineering\//i, `${fileLabel} must not link to internal skill source files`);
-  assert.doesNotMatch(
-    content,
-    /github\.com\/(mattpocock\/skills|PeterPhan369\/peterskills)/i,
-    `${fileLabel} must not contain source repo links`
-  );
-
-  const proseWithoutSlugs = content
-    .replace(/https?:\/\/[^\s)]+/g, '')
-    .replace(/`[^`]+`/g, '')
-    .replace(/\b(ask-matt|setup-matt-pocock-skills)\b/g, '');
-  assert.doesNotMatch(proseWithoutSlugs, /\b(matt|pocock|peter)\b/i, `${fileLabel} must not name authors`);
-
-  const links = [...content.matchAll(/\[[^\]]+\]\(([^)]+)\)/g)].map((m) => m[1]);
-  assert.ok(links.length > 0, `${fileLabel} must contain links`);
-  for (const href of links) {
-    assert.match(href, /^https:\/\//, `${fileLabel} links must all be absolute https://, found "${href}"`);
-  }
-
-  // Verify AI Coding Dictionary links are valid slugs and linked on first use only
-  const dictLinks = links.filter((href) => href.startsWith('https://www.aihero.dev/ai-coding-dictionary/'));
-  const seenSlugs = new Set();
-  for (const href of dictLinks) {
-    const slug = href.replace('https://www.aihero.dev/ai-coding-dictionary/', '');
-    assert.ok(KNOWN_DICTIONARY_SLUGS.has(slug), `${fileLabel} references unknown AI Coding Dictionary slug "${slug}"`);
-    assert.ok(!seenSlugs.has(slug), `${fileLabel} must link AI Coding Dictionary slug "${slug}" on first use only`);
-    seenSlugs.add(slug);
-  }
-
-  let lastIdx = -1;
-  for (const heading of requiredHeadings) {
-    const idx = content.indexOf(heading);
-    assert.ok(idx !== -1, `${fileLabel} must include heading "${heading}"`);
-    assert.ok(idx > lastIdx, `${fileLabel} heading "${heading}" must preserve template order`);
-    lastIdx = idx;
-  }
-
-  assert.ok(
-    content.includes('https://aihero.dev/skills-ask-matt'),
-    `${fileLabel} must link to https://aihero.dev/skills-ask-matt`
-  );
 }
 
 test('setup-matt-pocock-skills: SKILL.md Step 1 detects frontend/backend Stack profile signals and all 11 backend languages', () => {
@@ -233,6 +116,19 @@ test('setup-matt-pocock-skills: Step 2 Section D, Step 3, and Step 4 handle Stac
     step2,
     /language/i,
     'Section D must ask user to confirm target backend language(s) when backend is selected'
+  );
+  const sectionDMatch = step2.match(/\*\*Section D:\s*Stack profile\.?\*\*([\s\S]*)$/);
+  assert.ok(sectionDMatch, 'Step 2 must include Section D body');
+  const sectionD = sectionDMatch[1];
+  assert.match(
+    sectionD,
+    /11\s+supported[\s\S]*Step\s+1/i,
+    'Section D must reference the 11 supported language packs enumerated in Step 1'
+  );
+  assert.doesNotMatch(
+    sectionD,
+    /`c-cpp`[\s\S]*`swift`/,
+    'Section D must not duplicate the 11 language slugs already enumerated in Step 1'
   );
 
   const step3Match = content.match(/### 3\. Confirm and edit([\s\S]*?)### 4\. Write/);
@@ -416,8 +312,8 @@ test('mirrors and invariants: .agents/skills mirrors match byte-for-byte (normal
 
   for (const { name, src, dst } of mirrorPairs) {
     assert.ok(fs.existsSync(dst), `.agents/skills/${name} directory must exist`);
-    const srcFiles = collectFilesRecursive(src);
-    const dstFiles = collectFilesRecursive(dst);
+    const srcFiles = collectFilesRecursive(src, { relative: true });
+    const dstFiles = collectFilesRecursive(dst, { relative: true });
     assert.deepStrictEqual(dstFiles, srcFiles, `.agents/skills/${name} must have exact same file tree as skills/engineering/${name}`);
 
     for (const rel of srcFiles) {
@@ -436,10 +332,9 @@ test('mirrors and invariants: .agents/skills mirrors match byte-for-byte (normal
     }
   }
 
-  const avoidedGlossarySynonyms = /\b(coding aspect|skillset mode|domain mode|embedded rules|rule pack|baseline rules)\b/i;
   for (const filePath of filesToScan) {
     const text = fs.readFileSync(filePath, 'utf8');
     assert.ok(!text.includes('\u2014'), `${filePath} must contain zero em-dashes (\\u2014)`);
-    assert.doesNotMatch(text, avoidedGlossarySynonyms, `${filePath} must use Glossary terms instead of avoided synonyms`);
+    assert.doesNotMatch(text, AVOIDED_GLOSSARY_SYNONYMS, `${filePath} must use Glossary terms instead of avoided synonyms`);
   }
 });

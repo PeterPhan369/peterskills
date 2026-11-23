@@ -2,37 +2,16 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-
-const FRONTEND_SKILLS = ['ui-craft-floor', 'ui-polish', 'ui-review', 'ui-shape'];
-const BACKEND_SKILLS = ['backend-security-floor', 'security-review'];
-const ALL_DOMAIN_SKILLS = [...FRONTEND_SKILLS, ...BACKEND_SKILLS];
-
-function extractFrontmatter(markdown, filePath) {
-  const match = markdown.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-  assert.ok(match, `${filePath} must begin with YAML frontmatter`);
-  return match[1];
-}
-
-function normalizeNewlines(text) {
-  return text.replace(/\r\n/g, '\n');
-}
-
-function collectFilesRecursive(dir, extensions) {
-  const results = [];
-  if (!fs.existsSync(dir)) return results;
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      results.push(...collectFilesRecursive(full, extensions));
-    } else if (extensions.some((ext) => entry.name.endsWith(ext))) {
-      results.push(full);
-    }
-  }
-  return results;
-}
+import {
+  assertDocsCompliance,
+  collectFilesRecursive,
+  extractFrontmatter,
+  normalizeNewlines,
+  USER_INVOKED_DOMAIN_SKILLS,
+} from './helpers.mjs';
 
 test('domain invocation: all 6 domain skills (4 frontend + 2 backend) enforce user-only invocation in SKILL.md and openai.yaml', () => {
-  for (const skill of ALL_DOMAIN_SKILLS) {
+  for (const skill of USER_INVOKED_DOMAIN_SKILLS) {
     const skillPath = path.resolve('skills/engineering', skill, 'SKILL.md');
     const yamlPath = path.resolve('skills/engineering', skill, 'agents/openai.yaml');
 
@@ -55,7 +34,7 @@ test('domain invocation: all 6 domain skills (4 frontend + 2 backend) enforce us
 });
 
 test('domain invocation: all 6 domain skill descriptions are human-facing without model triggers', () => {
-  for (const skill of ALL_DOMAIN_SKILLS) {
+  for (const skill of USER_INVOKED_DOMAIN_SKILLS) {
     const skillPath = path.resolve('skills/engineering', skill, 'SKILL.md');
     const frontmatter = extractFrontmatter(fs.readFileSync(skillPath, 'utf8'), skillPath);
     const descMatch = frontmatter.match(/^description:\s*(.+)$/m);
@@ -109,43 +88,14 @@ test('domain invocation: docs/engineering/ui-craft-floor.md documents user invoc
   const docPath = path.resolve('docs/engineering/ui-craft-floor.md');
   const doc = fs.readFileSync(docPath, 'utf8');
 
-  assert.doesNotMatch(doc, /^#\s/m, 'docs/engineering/ui-craft-floor.md must have no H1');
-  assert.doesNotMatch(
-    doc,
-    /\]\(\.\.?\/[^)]+\)/,
-    'docs/engineering/ui-craft-floor.md must use absolute links only'
-  );
-  assert.doesNotMatch(
-    doc,
-    /npx skills|claude plugin|codex plugin|gemini skills/i,
-    'docs/engineering/ui-craft-floor.md must carry no install commands'
-  );
-  const docWithoutSkillSlugs = doc.replace(/setup-matt-pocock-skills|ask-matt/g, '');
-  assert.doesNotMatch(
-    docWithoutSkillSlugs,
-    /\bMatt(?:\s+Pocock)?\b/i,
-    'docs/engineering/ui-craft-floor.md must name no author'
-  );
-
-  const requiredHeadings = [
+  assertDocsCompliance(doc, 'docs/engineering/ui-craft-floor.md', [
     '## What it does',
     '## When to reach for it',
     '## The craft floor and anti-pattern catalog',
     '## Common questions',
     "## It's working if",
     '## Where it fits',
-  ];
-  let prevIndex = -1;
-  for (const heading of requiredHeadings) {
-    const idx = doc.indexOf(heading);
-    assert.ok(idx !== -1, `docs/engineering/ui-craft-floor.md must include "${heading}"`);
-    assert.ok(idx > prevIndex, `"${heading}" must appear in canonical template order`);
-    prevIndex = idx;
-  }
-  assert.ok(
-    doc.includes('https://aihero.dev/skills-ask-matt'),
-    'docs/engineering/ui-craft-floor.md must link to ask-matt'
-  );
+  ]);
 
   assert.ok(
     doc.includes('`/ui-craft-floor`'),
@@ -210,7 +160,7 @@ test('domain invocation: zero em-dashes across all 6 domain skills and touched d
     path.resolve('skills/engineering/README.md'),
   ];
 
-  for (const skill of ALL_DOMAIN_SKILLS) {
+  for (const skill of USER_INVOKED_DOMAIN_SKILLS) {
     filesToCheck.push(
       ...collectFilesRecursive(path.resolve('skills/engineering', skill), ['.md', '.yaml']),
       ...collectFilesRecursive(path.resolve('.agents/skills', skill), ['.md', '.yaml']),

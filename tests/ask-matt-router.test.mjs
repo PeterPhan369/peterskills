@@ -2,6 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import {
+  assertDocsCompliance,
+  AVOIDED_GLOSSARY_SYNONYMS,
+  extractFrontmatter,
+  USER_INVOKED_DOMAIN_SKILLS,
+} from './helpers.mjs';
 
 const ASK_MATT_SKILL_PATH = path.resolve('skills/engineering/ask-matt/SKILL.md');
 const ASK_MATT_YAML_PATH = path.resolve('skills/engineering/ask-matt/agents/openai.yaml');
@@ -20,64 +26,13 @@ const USER_INVOKED_SKILLS = [
   'implement-spec',
   'wayfinder',
   'retro',
-  'ui-craft-floor',
-  'ui-polish',
-  'ui-review',
-  'ui-shape',
-  'backend-security-floor',
-  'security-review',
+  ...USER_INVOKED_DOMAIN_SKILLS,
   'grill-me',
   'handoff',
   'teach',
   'to-questionnaire',
   'wait-what',
 ];
-
-const KNOWN_DICTIONARY_SLUGS = new Set([
-  'afk',
-  'agent',
-  'agent-mode',
-  'agents-md',
-  'automated-check',
-  'clearing',
-  'compaction',
-  'context',
-  'context-pointer',
-  'context-window',
-  'effort',
-  'environment',
-  'grilling',
-  'harness',
-  'human-in-the-loop',
-  'human-review',
-  'mcp',
-  'memory-system',
-  'model',
-  'parametric-knowledge',
-  'primary-source',
-  'progressive-disclosure',
-  'prototyping',
-  'secondary-source',
-  'session',
-  'skill',
-  'smart-zone',
-  'spec',
-  'stateful',
-  'stateless',
-  'subagent',
-  'ticket',
-  'token',
-  'tool',
-  'tool-call',
-  'turn',
-  'vibe-coding',
-]);
-
-function extractFrontmatter(markdown, filePath) {
-  const match = markdown.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-  assert.ok(match, `${filePath} must begin with YAML frontmatter`);
-  return match[1];
-}
 
 function extractSection(markdown, heading, nextHeading) {
   const startIdx = markdown.indexOf(heading);
@@ -246,65 +201,21 @@ test('ask-matt: Standalone lists all backend and frontend domain skills', () => 
 test('ask-matt: docs/engineering/ask-matt.md obeys .agents/writing-docs.md and reflects Stack profile routing', () => {
   const doc = fs.readFileSync(ASK_MATT_DOC_PATH, 'utf8');
 
-  assert.doesNotMatch(doc, /^#\s+/m, 'docs/engineering/ask-matt.md must have no H1');
-  assert.doesNotMatch(
+  assertDocsCompliance(
     doc,
-    /(?:npx skills@latest add|claude plugin (?:marketplace )?add|claude plugin install|codex plugin|gemini skills install)/i,
-    'docs/engineering/ask-matt.md must carry no install commands'
+    'docs/engineering/ask-matt.md',
+    [
+      '## What it does',
+      '## When to reach for it',
+      '## Prerequisites',
+      '## Flows, not skills',
+      '## The phase boundary',
+      '## Common questions',
+      "## It's working if",
+      '## Where it fits',
+    ],
+    { allowSkillsUpdateMention: true, requireAskMattLink: false }
   );
-  assert.doesNotMatch(
-    doc,
-    /github\.com\/(mattpocock\/skills|PeterPhan369\/peterskills)/i,
-    'docs/engineering/ask-matt.md must contain no source repo links'
-  );
-  assert.doesNotMatch(
-    doc,
-    /skills\/engineering\//i,
-    'docs/engineering/ask-matt.md must not link to internal skill source files'
-  );
-
-  const proseWithoutSlugs = doc
-    .replace(/https?:\/\/[^\s)]+/g, '')
-    .replace(/`[^`]+`/g, '')
-    .replace(/\b(ask-matt|setup-matt-pocock-skills)\b/g, '');
-  assert.doesNotMatch(
-    proseWithoutSlugs,
-    /\b(matt|pocock|peter)\b/i,
-    'docs/engineering/ask-matt.md must name no author'
-  );
-
-  const links = [...doc.matchAll(/\[[^\]]+\]\(([^)]+)\)/g)].map((m) => m[1]);
-  assert.ok(links.length > 0, 'docs/engineering/ask-matt.md must contain links');
-  for (const href of links) {
-    assert.match(href, /^https:\/\//, `Every link must be absolute https://, found "${href}"`);
-  }
-
-  const dictLinks = links.filter((href) => href.startsWith('https://www.aihero.dev/ai-coding-dictionary/'));
-  const seenSlugs = new Set();
-  for (const href of dictLinks) {
-    const slug = href.replace('https://www.aihero.dev/ai-coding-dictionary/', '');
-    assert.ok(KNOWN_DICTIONARY_SLUGS.has(slug), `Unknown dictionary slug "${slug}"`);
-    assert.ok(!seenSlugs.has(slug), `Dictionary slug "${slug}" must be linked on first use only`);
-    seenSlugs.add(slug);
-  }
-
-  const requiredHeadings = [
-    '## What it does',
-    '## When to reach for it',
-    '## Prerequisites',
-    '## Flows, not skills',
-    '## The phase boundary',
-    '## Common questions',
-    "## It's working if",
-    '## Where it fits',
-  ];
-  let lastIdx = -1;
-  for (const heading of requiredHeadings) {
-    const idx = doc.indexOf(heading);
-    assert.ok(idx !== -1, `docs/engineering/ask-matt.md must include "${heading}"`);
-    assert.ok(idx > lastIdx, `"${heading}" must appear in canonical template order`);
-    lastIdx = idx;
-  }
 
   assert.doesNotMatch(
     doc,
@@ -326,20 +237,30 @@ test('ask-matt: docs/engineering/ask-matt.md obeys .agents/writing-docs.md and r
     'https://aihero.dev/skills-ui-craft-floor',
     'https://aihero.dev/skills-backend-security-floor',
     'https://aihero.dev/skills-security-review',
+    'https://www.aihero.dev/ai-coding-dictionary/agent',
+    'https://www.aihero.dev/ai-coding-dictionary/prototyping',
   ]) {
     assert.ok(doc.includes(url), `docs/engineering/ask-matt.md must link to ${url}`);
   }
+
+  const agentLinkIdx = doc.indexOf('[agent](https://www.aihero.dev/ai-coding-dictionary/agent)');
+  assert.ok(agentLinkIdx !== -1, 'docs/engineering/ask-matt.md must link [agent](...)');
+  const beforeAgent = doc.slice(0, agentLinkIdx).replace(/`[^`]+`/g, '');
+  assert.doesNotMatch(beforeAgent, /\bagent\b/i, 'agent dictionary link must appear on first use');
+
+  const protoLinkIdx = doc.indexOf('[prototyping](https://www.aihero.dev/ai-coding-dictionary/prototyping)');
+  assert.ok(protoLinkIdx !== -1, 'docs/engineering/ask-matt.md must link [prototyping](...)');
+  const beforeProto = doc.slice(0, protoLinkIdx).replace(/`[^`]+`/g, '');
+  assert.doesNotMatch(beforeProto, /\bprototyping\b/i, 'prototyping dictionary link must appear on first use');
 });
 
 test('ask-matt: zero em-dashes and zero avoided glossary synonyms across skill, mirror, and doc', () => {
-  const avoidedGlossarySynonyms = /\b(coding aspect|skillset mode|domain mode|embedded rules|rule pack|baseline rules)\b/i;
-
   for (const filePath of [ASK_MATT_SKILL_PATH, ASK_MATT_MIRROR_PATH, ASK_MATT_DOC_PATH]) {
     const content = fs.readFileSync(filePath, 'utf8');
     assert.ok(!content.includes('\u2014'), `${filePath} must contain zero em-dashes`);
     assert.doesNotMatch(
       content,
-      avoidedGlossarySynonyms,
+      AVOIDED_GLOSSARY_SYNONYMS,
       `${filePath} must use GLOSSARY.md terms instead of avoided synonyms`
     );
   }

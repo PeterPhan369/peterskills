@@ -87,7 +87,7 @@ Lead with the recommended profile from Step 1 (`frontend` or `backend`) and conf
 - `frontend`: seeds the frontend UI craft **Quality floor** into `docs/agents/quality-floor.md`.
 - `backend`: seeds the backend security **Quality floor** into `docs/agents/quality-floor.md` and compiles `docs/agents/security-rules.md` for your target language(s).
 
-When `backend` is selected, present the language(s) detected in Step 1 and ask the user to confirm or adjust which language pack(s) apply from the 11 supported options: `c-cpp` (C / C++), `csharp` (C# / .NET), `go` (Go), `java` (Java), `javascript-typescript` (JS / TS), `kotlin` (Kotlin), `php` (PHP), `python` (Python), `ruby` (Ruby), `rust` (Rust), `swift` (Swift).
+When `backend` is selected, present the language(s) detected in Step 1 and ask the user to confirm or adjust which of the 11 supported language packs enumerated in Step 1 apply.
 
 ### 3. Confirm and edit
 

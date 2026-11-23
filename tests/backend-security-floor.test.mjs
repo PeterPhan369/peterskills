@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import { assertDocsCompliance, extractFrontmatter } from './helpers.mjs';
 
 const SKILL_DIR = path.resolve('skills/engineering/backend-security-floor');
 const MIRROR_DIR = path.resolve('.agents/skills/backend-security-floor');
@@ -35,9 +36,7 @@ test('backend-security-floor: SKILL.md frontmatter and openai.yaml enforce user-
   assert.ok(fs.existsSync(skillPath), 'skills/engineering/backend-security-floor/SKILL.md must exist');
   const skillContent = fs.readFileSync(skillPath, 'utf8');
 
-  const fmMatch = skillContent.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-  assert.ok(fmMatch, 'SKILL.md must begin with YAML frontmatter');
-  const fm = fmMatch[1];
+  const fm = extractFrontmatter(skillContent, skillPath);
 
   assert.match(fm, /^name:\s*backend-security-floor\s*$/m, 'Frontmatter must set name: backend-security-floor');
   assert.match(fm, /^disable-model-invocation:\s*true\s*$/m, 'Frontmatter must set disable-model-invocation: true');
@@ -187,43 +186,14 @@ test('backend-security-floor: docs page conforms to .agents/writing-docs.md', ()
   assert.ok(fs.existsSync(DOCS_PATH), 'docs/engineering/backend-security-floor.md must exist');
   const content = fs.readFileSync(DOCS_PATH, 'utf8');
 
-  assert.doesNotMatch(content, /^#\s+/m, 'Docs page must not contain an H1 heading');
-  assert.doesNotMatch(content, /\b(npx skills|claude plugin|codex plugin)\b/i, 'Docs page must not contain install commands');
-  assert.doesNotMatch(content, /skills\/engineering\//i, 'Docs page must not link to internal skill source files');
-  assert.doesNotMatch(content, /github\.com\/(mattpocock\/skills|PeterPhan369\/peterskills)/i, 'Docs page must not contain source repo links');
-  const proseOnly = content
-    .replace(/https?:\/\/[^\s)]+/g, '')
-    .replace(/`[^`]+`/g, '')
-    .replace(/\b(ask-matt|setup-matt-pocock-skills)\b/g, '');
-  assert.doesNotMatch(proseOnly, /\b(matt|pocock|peter)\b/i, 'Docs page must not name authors');
-
-  // Verify every markdown link is absolute https://
-  const links = [...content.matchAll(/\[[^\]]+\]\(([^)]+)\)/g)].map(m => m[1]);
-  assert.ok(links.length > 0, 'Docs page must contain links');
-  for (const href of links) {
-    assert.match(href, /^https:\/\//, `Every link in docs page must be absolute https://, found "${href}"`);
-  }
-
-  const requiredHeadings = [
+  assertDocsCompliance(content, 'docs/engineering/backend-security-floor.md', [
     '## What it does',
     '## When to reach for it',
     '## Common questions',
     "## It's working if",
     '## Where it fits',
-  ];
+  ]);
 
-  let lastIdx = -1;
-  for (const heading of requiredHeadings) {
-    const idx = content.indexOf(heading);
-    assert.ok(idx !== -1, `Docs page must include "${heading}"`);
-    assert.ok(idx > lastIdx, `Docs heading "${heading}" must appear in template order`);
-    lastIdx = idx;
-  }
-
-  assert.ok(
-    content.includes('https://aihero.dev/skills-ask-matt'),
-    'Docs page must link to https://aihero.dev/skills-ask-matt'
-  );
   assert.match(content, /\/backend-security-floor/, 'Docs page must document user-invoked /backend-security-floor command');
 });
 

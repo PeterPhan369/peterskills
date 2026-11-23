@@ -8,16 +8,13 @@ disable-model-invocation: true
 
 Adversarial, read-only security audit of backend changes, services, or configuration surfaces. Produce a verified `P0` to `P3` findings report and a Refuted Candidates trail without modifying any repository files.
 
-## 1. Load Baseline Rules
+## 1. Load the Active Quality Floor
 
-Read the repository's active security baseline directly from disk first when configured:
+Read the repository's active **Quality floor** and security rules directly from disk first as primary external references when configured:
 - `docs/agents/quality-floor.md`
 - `docs/agents/security-rules.md`
 
-When either file is absent, fall back directly to reading:
-- [../backend-security-floor/SKILL.md](../backend-security-floor/SKILL.md)
-- [../backend-security-floor/SECURITY-RULES.md](../backend-security-floor/SECURITY-RULES.md)
-- Matching language sharp-edge pack(s) under [../backend-security-floor/lang/](../backend-security-floor/lang/) for the languages present in scope.
+When either file is absent, tell the user `/setup-matt-pocock-skills` creates them if missing, and fall back directly on disk to reading the installed `backend-security-floor` skill's `SKILL.md`, `SECURITY-RULES.md`, and matching `lang/*.md` files for the languages present in scope.
 
 Read `GLOSSARY.md` and `docs/adr/` if present so findings respect documented domain boundaries and accepted security ADRs.
 
@@ -46,9 +43,9 @@ Determine the mode from the user's target:
 
 ## 3. Run Parallel Discovery Sub-Agents
 
-Spawn two discovery sub-agents **in parallel** in the foreground. Start every sub-agent with a **fresh context window** rather than forking the parent conversation. Instruct both sub-agents to treat the repository as strictly read-only, perform the scan directly without spawning nested agents or invoking `/security-review`, and keep all candidates regardless of perceived severity (report every candidate with `refuted: true` by default so discovery recall never collapses).
+Spawn two discovery sub-agents **in parallel** in the foreground. Start every sub-agent with a **fresh context window** rather than forking the parent conversation. Instruct both sub-agents to treat the repository as strictly read-only, perform the scan directly, and keep all candidates regardless of perceived severity (report every candidate with `refuted: true` by default so discovery recall never collapses).
 
-Give both sub-agents the mode, target file list (plus diff, `git blame`/`git log -S`, blast-radius, and test-gap triage in Diff Mode), and exact paths to the baseline rules loaded in Step 1:
+Give both sub-agents the mode, target file list (plus diff, `git blame`/`git log -S`, blast-radius, and test-gap triage in Diff Mode), and exact paths to the active **Quality floor** and security rules loaded in Step 1:
 
 - **Sub-agent A: Insecure Defaults & Config Cliffs**
   - Hunt configurable fail-open defaults (`env.get(KEY, fallback)`, permissive auth/TLS/debug toggles, `0`/`-1` sentinel timeouts or limits, boolean string traps, unvalidated security constructors), unconditional hardcoded credentials, permissive CORS/ACLs (`0o666`, `public-read`, `*` + credentials), production debug surfaces, and stack-trace or secret leaks in logs and responses.
@@ -97,37 +94,13 @@ This is a strictly read-only audit: never edit, patch, or modify repository file
     ```
 
 ### P1 (High: Cross-Tenant IDOR, Preconditioned Injection, Weak Crypto at Sink, Security Regression)
-* **[Rule ID / Issue Title]** in `<file>:<line>` (Siblings: `<other file:line>` or `none`)
-  * **Attacker Model**: `WHO` / `ACCESS` / `INTERFACE` / `Exploitability`
-  * **Source-to-Sink**: `<source file:line>` -> `<sink file:line>`
-  * **Exploit Scenario**: <Concrete attack path>
-  * **Remediation**:
-    ```diff
-    - <vulnerable code>
-    + <remediation>
-    ```
+* Use the P0 finding schema (`Attacker Model`, `Source-to-Sink`, `Exploit Scenario`, `Remediation` diff).
 
 ### P2 (Medium: Permissive Defaults, Test Gap on Security Change, Log Redaction Gap, Defense-in-Depth)
-* **[Rule ID / Issue Title]** in `<file>:<line>`
-  * **Attacker Model**: `WHO` / `ACCESS` / `INTERFACE` / `Exploitability`
-  * **Source-to-Sink**: `<source file:line>` -> `<sink file:line>`
-  * **Exploit Scenario**: <Concrete impact path>
-  * **Remediation**:
-    ```diff
-    - <vulnerable code>
-    + <remediation>
-    ```
+* Use the P0 finding schema (`Attacker Model`, `Source-to-Sink`, `Exploit Scenario`, `Remediation` diff).
 
 ### P3 (Advisory: Sharp-Edge APIs, Configuration Cliffs, Structural Hardening)
-* **[Rule ID / Issue Title]** in `<file>:<line>`
-  * **Attacker Model**: `WHO` / `ACCESS` / `INTERFACE` / `Exploitability`
-  * **Source-to-Sink**: `<source file:line>` -> `<sink file:line>`
-  * **Exploit Scenario**: <Misuse or future regression risk>
-  * **Remediation**:
-    ```diff
-    - <current sharp-edge API or config>
-    + <hardened Pit of Success alternative>
-    ```
+* Use the P0 finding schema (`Attacker Model`, `Source-to-Sink`, `Exploit Scenario`, `Remediation` diff).
 
 ## Refuted Candidates
 
