@@ -1,3 +1,5 @@
 interface:
   display_name: "UI Craft Floor"
   short_description: "Standards and anti-slop rules for UI code"
+policy:
+  allow_implicit_invocation: false
