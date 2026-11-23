@@ -4,6 +4,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const FRONTEND_SKILLS = ['ui-craft-floor', 'ui-polish', 'ui-review', 'ui-shape'];
+const BACKEND_SKILLS = ['backend-security-floor', 'security-review'];
+const ALL_DOMAIN_SKILLS = [...FRONTEND_SKILLS, ...BACKEND_SKILLS];
 
 function extractFrontmatter(markdown, filePath) {
   const match = markdown.match(/^---\r?\n([\s\S]*?)\r?\n---/);
@@ -29,8 +31,8 @@ function collectFilesRecursive(dir, extensions) {
   return results;
 }
 
-test('domain invocation: all 4 frontend skills enforce user-only invocation in SKILL.md and openai.yaml', () => {
-  for (const skill of FRONTEND_SKILLS) {
+test('domain invocation: all 6 domain skills (4 frontend + 2 backend) enforce user-only invocation in SKILL.md and openai.yaml', () => {
+  for (const skill of ALL_DOMAIN_SKILLS) {
     const skillPath = path.resolve('skills/engineering', skill, 'SKILL.md');
     const yamlPath = path.resolve('skills/engineering', skill, 'agents/openai.yaml');
 
@@ -52,19 +54,21 @@ test('domain invocation: all 4 frontend skills enforce user-only invocation in S
   }
 });
 
-test('domain invocation: ui-craft-floor SKILL.md description is human-facing without model triggers', () => {
-  const skillPath = path.resolve('skills/engineering/ui-craft-floor/SKILL.md');
-  const frontmatter = extractFrontmatter(fs.readFileSync(skillPath, 'utf8'), skillPath);
-  const descMatch = frontmatter.match(/^description:\s*(.+)$/m);
-  assert.ok(descMatch, 'ui-craft-floor/SKILL.md frontmatter must declare description');
+test('domain invocation: all 6 domain skill descriptions are human-facing without model triggers', () => {
+  for (const skill of ALL_DOMAIN_SKILLS) {
+    const skillPath = path.resolve('skills/engineering', skill, 'SKILL.md');
+    const frontmatter = extractFrontmatter(fs.readFileSync(skillPath, 'utf8'), skillPath);
+    const descMatch = frontmatter.match(/^description:\s*(.+)$/m);
+    assert.ok(descMatch, `${skill}/SKILL.md frontmatter must declare description`);
 
-  const description = descMatch[1].trim();
-  assert.ok(description.length > 0, 'ui-craft-floor description must not be empty');
-  assert.doesNotMatch(
-    description,
-    /\bUse when(?:ever)?\b/i,
-    'ui-craft-floor description must be human-facing and omit model-trigger phrasing like "Use whenever"'
-  );
+    const description = descMatch[1].trim();
+    assert.ok(description.length > 0, `${skill} description must not be empty`);
+    assert.doesNotMatch(
+      description,
+      /\bUse when(?:ever)?\b/i,
+      `${skill} description must be human-facing and omit model-trigger phrasing like "Use whenever"`
+    );
+  }
 });
 
 test('domain invocation: README.md and skills/engineering/README.md list ui-craft-floor under User-invoked only', () => {
@@ -200,13 +204,13 @@ test('domain invocation: .agents/skills/ui-craft-floor mirrors SKILL.md, DETECTO
   }
 });
 
-test('domain invocation: zero em-dashes across all 4 frontend skills and touched docs', () => {
+test('domain invocation: zero em-dashes across all 6 domain skills and touched docs', () => {
   const filesToCheck = [
     path.resolve('README.md'),
     path.resolve('skills/engineering/README.md'),
   ];
 
-  for (const skill of FRONTEND_SKILLS) {
+  for (const skill of ALL_DOMAIN_SKILLS) {
     filesToCheck.push(
       ...collectFilesRecursive(path.resolve('skills/engineering', skill), ['.md', '.yaml']),
       ...collectFilesRecursive(path.resolve('.agents/skills', skill), ['.md', '.yaml']),

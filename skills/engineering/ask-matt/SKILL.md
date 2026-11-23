@@ -17,9 +17,10 @@ A **flow** is a path through the skills. Most paths run along one **main flow**,
 The route most work travels. You have an idea and want it built.
 
 1. **`/grill-with-docs`** sharpens the idea by interview. Start here whenever you are **working in a working directory**: it's stateful, retaining what it learns in `GLOSSARY.md` and ADRs. (No working directory? Use `/grill-me` instead, covered under Standalone. Both run the same `/grilling` primitive; `grill-with-docs` is the one that leaves a paper trail, which makes it the better of the two whenever a repo is there to leave it in.)
-2. **Branch: can you settle every question in conversation?** If a question needs a runnable answer (state, business logic, a UI you have to see), detour through a prototype, bridged by **`/handoff`** in both directions (a prototype lives in its own directory, which is exactly what `/handoff` is for; see Phase boundaries):
-   - **`/handoff`** out, then open a fresh session against that file,
-   - **`/prototype`** to answer the question with throwaway code, or **`/ui-shape`** to plan screen layout, visual hierarchy, and component seams before coding,
+2. **Branch: can you settle every question in conversation?** If a question needs a runnable answer or concrete boundary design before coding, branch by **Stack profile** (`frontend` vs. `backend`), bridged by **`/handoff`** in both directions when working in a separate directory (see Phase boundaries):
+   - **`/handoff`** out, then open a fresh session against that file (when isolating a throwaway prototype),
+   - **`frontend`**: **`/ui-shape`** to plan screen layout, visual hierarchy, and component seams before coding, or **`/prototype`** for throwaway UI/state variations,
+   - **`backend`**: **`/prototype`** to validate threat boundaries, API contracts, and fail-secure behavior before production implementation,
    - **`/handoff`** back what you learned, and reference it from the original idea thread.
 3. **Branch: is this a multi-session build?**
    - **Yes** → **`/to-spec`** (turn the thread into a spec), then **`/to-tickets`** to split it into tracer-bullet tickets, each declaring its **blocking edges**. Then work the tickets one of two ways:
@@ -27,7 +28,10 @@ The route most work travels. You have an idea and want it built.
      - **`/implement-spec`** for the whole spec in one run. It reads the tickets as a **task graph**, runs implementer subagents across the ready **frontier** in parallel, and lands everything on one **integration branch**. Reach for it when you'd rather orchestrate the build than drive each ticket yourself.
    - **No** → **`/implement`** right here, in the same context window.
 
-   Either way, the code gets built by driving **/tdd** (one red-green slice at a time) and closes out with **/code-review**, a two-axis review (Standards + Spec) of the diff. `/implement` runs both per ticket; `/implement-spec`'s implementers each drive `/tdd`, and it runs one `/code-review` over the integration branch. For frontend interfaces, run **/ui-polish** to eliminate anti-patterns and perfect visual craft before running `/code-review`. Reach for **/tdd** on its own when you just want to build a concrete behaviour test-first without a full spec, and **/code-review** on its own whenever you want to review a branch or PR against a fixed point.
+   Either way, the code gets built by driving **/tdd** (one red-green slice at a time) and closes out with **/code-review**, a two-axis review (Standards + Spec) of the diff. `/implement` runs both per ticket; `/implement-spec`'s implementers each drive `/tdd`, and it runs one `/code-review` over the integration branch. Branch the pre-merge quality pass by **Stack profile**:
+   - **`frontend`**: run **/ui-polish** to eliminate anti-patterns and **`/ui-review`** to audit usability heuristics and the 75 detector rules before running `/code-review`.
+   - **`backend`**: run **`/security-review`** (Diff Mode) alongside `/code-review` to catch fail-open defaults, auth/authz regressions, and injection or crypto flaws.
+   Reach for **/tdd** on its own when you just want to build a concrete behaviour test-first without a full spec, and **/code-review** on its own whenever you want to review a branch or PR against a fixed point.
 
    When the work goes up as a pull request, **/pr** shapes the body: the smallest visual that shows the change, before/after evidence that it works, and a one-way or two-way door call. It's model-invoked, so the agent reaches for it whenever it writes a PR.
 
@@ -57,17 +61,22 @@ A starting situation that generates work, then merges onto the main flow.
 
 Not feature work, just upkeep.
 
-- **`/improve-codebase-architecture`** runs whenever you have a spare moment to keep the codebase good for agents to operate in. It surfaces **deepening opportunities**; picking one _generates an idea_ you can take into the main flow at `/grill-with-docs`. It's the survey that finds the candidates; **`/codebase-design`** (below) is the bench you design the chosen one on.
-- **`/ui-review`** evaluates existing frontend code against usability heuristics and 75 deterministic detector rules. It outputs prioritized findings (P0 to P3) without editing code, catching accessibility defects, AI tells, and layout breakage before you ship.
-- **`/ui-polish`** takes an existing component or page and repairs it directly based on your instructions, selecting targeted directional playbooks (Bolder, Quieter, Distill, Layout, Typeset, Colorize, Animate, Harden) to elevate visual craft.
+- **`/improve-codebase-architecture`** runs whenever you have a spare moment to keep the codebase good for agents to operate in. It reads the repo's active **Quality floor** (`docs/agents/quality-floor.md`, plus `docs/agents/security-rules.md` when present) and surfaces **deepening opportunities** aligned with the active **Stack profile** (component and UI state seam locality for `frontend`; centralized authorization, validated configuration, and Pit of Success interfaces for `backend`). Picking one _generates an idea_ you can take into the main flow at `/grill-with-docs`. It's the survey that finds the candidates; **`/codebase-design`** (below) is the bench you design the chosen one on.
+- **`/ui-review`** (`frontend`): evaluates existing frontend code against usability heuristics and 75 deterministic detector rules, outputting prioritized findings (`P0` to `P3`) without editing code.
+- **`/ui-polish`** (`frontend`): takes an existing component or page and repairs it directly based on your instructions, selecting targeted directional playbooks (Bolder, Quieter, Distill, Layout, Typeset, Colorize, Animate, Harden) to elevate visual craft.
+- **`/security-review`** (`backend`): runs an adversarial, read-only security audit (Surface Mode over a service or directory, or Diff Mode over a branch), filtering candidates through a 5-step false-positive refutation gate into verified `P0` to `P3` findings plus a Refuted Candidates trail.
 
 ## Vocabulary underneath
 
-Three model-invoked references that run *beneath* the other skills, each the single source of truth for its vocabulary. Reach for them directly when the **words**, not the process, are the problem; or let the skills above pull them in.
+Two model-invoked references run *beneath* the other skills, each the single source of truth for its vocabulary. Reach for them directly when the **words**, not the process, are the problem; or let the skills above pull them in.
 
 - **`/domain-modeling`**: sharpen the project's *domain* language: challenge a fuzzy term, resolve an overloaded word ("account" doing three jobs), record a hard-to-reverse decision as an ADR. It's the active discipline `/grill-with-docs` drives to keep `GLOSSARY.md` a clean glossary.
-- **`/codebase-design`** is the deep-module vocabulary (module, interface, depth, seam, adapter, leverage, locality) for designing a module's *shape*: a lot of behaviour behind a small interface at a clean seam. `/tdd` and `/improve-codebase-architecture` both speak it.
-- **`/ui-craft-floor`** is the baseline quality floor and anti-pattern defense for frontend interfaces. It prevents default AI tells (nested cards, purple gradients, side-accent borders) and enforces accessibility, contrast, and responsive measure whenever UI is built or modified.
+- **`/codebase-design`**: the deep-module vocabulary (module, interface, depth, seam, adapter, leverage, locality) for designing a module's *shape*: a lot of behaviour behind a small interface at a clean seam. `/tdd` and `/improve-codebase-architecture` both speak it.
+
+Alongside those two model-invoked references, two **user-invoked Quality floors** serve as pointer-gated domain baselines. They spend zero global context and activate per repository when `/setup-matt-pocock-skills` writes `docs/agents/quality-floor.md` (and `docs/agents/security-rules.md` for `backend`) and points to it from `CLAUDE.md` or `AGENTS.md`:
+
+- **`/ui-craft-floor`** (`frontend`, user-invoked): baseline visual craft standards and 75 deterministic detector rules preventing default AI tells, weak contrast, and layout breakage.
+- **`/backend-security-floor`** (`backend`, user-invoked): baseline security standards enforcing Pit of Success, Fail-Secure by Default, Deny-by-Default Authorization, 42 core rules, and 11 modular language packs.
 
 ## Phase boundaries
 
@@ -93,11 +102,14 @@ Off the main flow entirely.
 - **`/wizard`** is for the steps only a **human** can take: provisioning infrastructure, setting up credentials or CI secrets, clicking through an unfamiliar third-party dashboard, running a one-off migration or cutover. It generates an interactive bash script that opens each URL, captures each value, and writes it into `.env` and GitHub secrets, so the procedure stops being something you re-explain to an agent every time. Model-invoked, so the agent reaches for it the moment it hits a wall only you can pass. If the agent could just do it itself, it should; this is for where a human is genuinely in the loop.
 - **`/wait-what`** is the corrective for a message that didn't land. Use it mid-conversation, inside any other skill, and the agent re-pitches what it just said with the context you were missing, in plain English, using the `GLOSSARY.md` vocabulary. It works after the fact; `/grill-with-docs` is the upfront cure, because a shared language agreed early is what stops the jargon arriving at all.
 - **`/teach`**: learn a concept over multiple sessions, using the current directory as a stateful workspace.
-- **`/ui-shape`**: plan UX/UI layouts, visual hierarchy, and component seams before writing production frontend code.
-- **`/ui-review`**: audit existing interface code against usability heuristics and 75 deterministic detector rules, returning prioritized P0-P3 findings.
-- **`/ui-polish`**: repair, refine, and perfect existing UI and styles directly based on your prompt, applying targeted directional playbooks.
+- **`/ui-craft-floor`** (`frontend`): inspect or apply the UI craft **Quality floor** and 75 deterministic detector rules directly.
+- **`/ui-shape`** (`frontend`): plan UX/UI layouts, visual hierarchy, and component seams before writing production frontend code.
+- **`/ui-review`** (`frontend`): audit existing interface code against usability heuristics and 75 deterministic detector rules, returning prioritized P0 to P3 findings.
+- **`/ui-polish`** (`frontend`): repair, refine, and perfect existing UI and styles directly based on your prompt, applying targeted directional playbooks.
+- **`/backend-security-floor`** (`backend`): inspect or apply the backend security **Quality floor**, refused AI security defaults, core rules, and language packs directly.
+- **`/security-review`** (`backend`): run an adversarial read-only security audit in Diff Mode or Surface Mode with parallel discovery and a 5-step refutation gate.
 - **`/writing-for-agents`** is the reference for writing documents agents consume: skills, AGENTS.md, pointed-at docs.
 
 ## Precondition
 
-**`/setup-matt-pocock-skills`**: run before your first engineering flow to configure the issue tracker, triage labels, and doc layout the other skills assume. Custom issue trackers also work.
+**`/setup-matt-pocock-skills`**: run before your first engineering flow to configure the issue tracker, triage labels, domain doc layout, and **Stack profile** (`frontend` or `backend`) the other skills assume. Setup seeds `docs/agents/quality-floor.md` for the chosen profile and, when `backend` is selected, lets you confirm target languages from 11 modular language packs to compile `docs/agents/security-rules.md` (and prunes unused local skill directories and language files). Custom issue trackers also work.

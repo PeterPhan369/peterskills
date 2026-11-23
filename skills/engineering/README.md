@@ -10,11 +10,13 @@ Reachable only when you type them (Claude Code: `disable-model-invocation: true`
 - **[grill-with-docs](./grill-with-docs/SKILL.md)**: Grilling session that also builds your project's domain model, sharpening terminology and updating `GLOSSARY.md` and ADRs inline.
 - **[triage](./triage/SKILL.md)**: Move issues through a state machine of triage roles.
 - **[improve-codebase-architecture](./improve-codebase-architecture/SKILL.md)**: Scan a codebase for deepening opportunities, present them as a visual HTML report, then grill through whichever one you pick.
-- **[setup-matt-pocock-skills](./setup-matt-pocock-skills/SKILL.md)**: Configure this repo for the engineering skills (issue tracker, triage labels, domain doc layout). Run once per repo.
+- **[setup-matt-pocock-skills](./setup-matt-pocock-skills/SKILL.md)**: Configure this repo for the engineering skills (issue tracker, triage labels, domain doc layout, and Stack profile for `frontend` or `backend`). Run once per repo.
 - **[to-spec](./to-spec/SKILL.md)**: Turn the current conversation into a spec and publish it to the issue tracker.
 - **[to-tickets](./to-tickets/SKILL.md)**: Break any plan, spec, or conversation into a set of tracer-bullet tickets, each declaring its blocking edges, whether as text in a local file or as native blocking links on a real tracker.
 - **[implement](./implement/SKILL.md)**: Build the work described by a spec or set of tickets, driving `/tdd` at pre-agreed seams and closing out with `/code-review` before committing.
 - **[implement-spec](./implement-spec/SKILL.md)**: Implement a whole spec on one integration branch. Works the tickets as a task graph, running implementer subagents across the ready frontier for maximum concurrency, then closes out with `/code-review`.
+- **[backend-security-floor](./backend-security-floor/SKILL.md)**: Shared security **Quality floor** for backend APIs, auth, config, and cryptography, enforcing fail-secure defaults, deny-by-default authorization, Pit of Success design, and 11 modular language packs.
+- **[security-review](./security-review/SKILL.md)**: Adversarial backend security audit in Diff Mode or Surface Mode with parallel discovery and a 5-step false-positive refutation gate.
 - **[ui-craft-floor](./ui-craft-floor/SKILL.md)**: Shared standards and quality floor for frontend UI/UX design, preventing AI slop patterns and enforcing accessibility and contrast.
 - **[ui-polish](./ui-polish/SKILL.md)**: Repair, refine, and perfect frontend UI and styles in an existing project based on user instructions.
 - **[ui-review](./ui-review/SKILL.md)**: Comprehensive UI/UX design review evaluating interface code against usability heuristics and 75 deterministic detector rules.

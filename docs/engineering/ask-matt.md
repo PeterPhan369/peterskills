@@ -14,23 +14,32 @@ You invoke this by typing `/ask-matt`; the agent won't reach for it on its own.
 | Bugs and requests arriving from other people | The [triage](https://aihero.dev/skills-triage) on-ramp, and why [tickets](https://www.aihero.dev/ai-coding-dictionary/ticket) you generated yourself don't belong on it |
 | Two skills that look interchangeable | The line between them, and it is usually one concrete test rather than a matter of taste. [grill-me](https://aihero.dev/skills-grill-me) or [grill-with-docs](https://aihero.dev/skills-grill-with-docs) turns on whether you are in a working directory; [grill-with-docs](https://aihero.dev/skills-grill-with-docs) or [wayfinder](https://aihero.dev/skills-wayfinder) turns on whether the effort fits one session |
 | A long session and a decision about the [context](https://www.aihero.dev/ai-coding-dictionary/context) | The ordered tree over the five options at a phase boundary |
+| Frontend or backend work, and unsure which quality or review skill fits | Routes by your **Stack profile** (`frontend` or `backend`) across shaping, prototyping, review, and polish steps |
 | A skill you have already picked | Nothing useful. Invoke that skill directly. |
 
 ## Prerequisites
 
 The router names skills; it does not install them. Everything it points at has to be installed for the recommendation to be actionable, and it only knows the promoted skills in this repo.
 
-The tracker-dependent routes (triage, `to-spec`, `to-tickets`, `implement`) assume [setup-matt-pocock-skills](https://aihero.dev/skills-setup-matt-pocock-skills) has already configured an issue tracker in the repo. The router recommends them even before that has happened.
+The tracker- and **Stack profile**-dependent routes (`triage`, `to-spec`, `to-tickets`, `implement`, `improve-codebase-architecture`, and domain checks) assume [setup-matt-pocock-skills](https://aihero.dev/skills-setup-matt-pocock-skills) has already configured an issue tracker and chosen `frontend` or `backend` (`docs/agents/quality-floor.md`, plus compiled `docs/agents/security-rules.md` for `backend`) in the repo. The router recommends them even before that has happened.
 
 ## Flows, not skills
 
 The skill's leading word is **flow**, a path *through* the skills rather than a single skill. When you name your situation, the router places you at a step on a flow. That is a different answer from "here is the skill that matches your keywords". There are five kinds of route, and the skill itself describes them in full:
 
-- **The main flow**, idea to ship. Grill, spec, tickets, implement (one ticket at a time, or the whole task graph in parallel with [implement-spec](https://aihero.dev/skills-implement-spec)), review, then [retro](https://aihero.dev/skills-retro), which feeds what the build taught back into the agent's environment. It has two branches. One is a prototype detour, for when a question needs runnable code to settle it. The other is the spec-and-tickets split, which is only worth its cost when the build spans more than one session.
+- **The main flow**, idea to ship. Grill, spec, tickets, implement (one ticket at a time, or the whole task graph in parallel with [implement-spec](https://aihero.dev/skills-implement-spec)), review with [code-review](https://aihero.dev/skills-code-review), then [retro](https://aihero.dev/skills-retro), which feeds what the build taught back into the agent's environment. Two decisions shape the path, and domain checks branch by **Stack profile**:
+  - **Prototype or shaping detour**: for `frontend`, [ui-shape](https://aihero.dev/skills-ui-shape) plans layout and component seams before code; for `backend`, [prototype](https://aihero.dev/skills-prototype) validates threat boundaries, API contracts, and fail-secure behavior.
+  - **Spec-and-tickets split**: worth its cost only when the build spans more than one session.
+  - **Pre-merge quality pass**: for `frontend`, run [ui-polish](https://aihero.dev/skills-ui-polish) and [ui-review](https://aihero.dev/skills-ui-review) before `code-review`; for `backend`, run [security-review](https://aihero.dev/skills-security-review) alongside `code-review`.
 - **On-ramps**, for a situation that generates work and then merges onto the main flow: incoming bug reports, something broken, or an effort too foggy and too large to hold in one session.
-- **Codebase health**, upkeep rather than feature work. [improve-codebase-architecture](https://aihero.dev/skills-improve-codebase-architecture) surveys the code for deepening opportunities, and each one it finds re-enters the main flow as an idea.
-- **Standalones**, which sit off every flow and which you use on their own: the prototype, the questionnaire, the research run.
-- **A vocabulary layer underneath**, the two references the other skills pull in when the words rather than the process are the problem.
+- **Codebase health**, upkeep rather than feature work:
+  - [improve-codebase-architecture](https://aihero.dev/skills-improve-codebase-architecture) reads the repo's active **Quality floor** (`docs/agents/quality-floor.md`) to survey deepening opportunities, and each one it finds re-enters the main flow as an idea.
+  - For `frontend`, `ui-review` audits usability heuristics and detector rules, and `ui-polish` refines interfaces directly.
+  - For `backend`, `security-review` audits services or diffs through a five-step false-positive refutation gate.
+- **Standalones**, which sit off every flow and which you use on their own: the prototype, the questionnaire, the research run, and direct UI or security audits and baselines.
+- **A vocabulary layer underneath**:
+  - Two model-invoked references pulled in when the words rather than the process are the problem: [domain-modeling](https://aihero.dev/skills-domain-modeling) and [codebase-design](https://aihero.dev/skills-codebase-design).
+  - Two pointer-gated user-invoked **Quality floors** wired into `docs/agents/quality-floor.md` during setup so neither spends global context in the other stack: [ui-craft-floor](https://aihero.dev/skills-ui-craft-floor) (`frontend`) and [backend-security-floor](https://aihero.dev/skills-backend-security-floor) (`backend`).
 
 ## The phase boundary
 
@@ -54,7 +63,7 @@ People keep asking for one in the README. This skill is that list. A static tabl
 
 **It told me half the skills aren't installed.**
 
-This is a known bug, and it is not fixed. Most of the skills the router routes you through set `disable-model-invocation: true`, which means the harness leaves them out of the skill list it injects into the agent's context. The agent reads that list as exhaustive and reports them missing. In one reported session, it declared the whole spec-and-tickets flow absent and rerouted to bare `/grilling` and `/tdd`. Sixteen of the plugin's twenty-seven skills carry the flag, so this is the common case rather than an edge. They are installed. Type the slash command anyway, or check `.claude-plugin/plugin.json`, which is the authority on what is present.
+This is a known bug, and it is not fixed. Most of the skills the router routes you through set `disable-model-invocation: true`, which means the harness leaves them out of the skill list it injects into the agent's context. The agent reads that list as exhaustive and reports them missing. In one reported session, it declared the whole spec-and-tickets flow absent and rerouted to bare `/grilling` and `/tdd`. Twenty-two of the plugin's thirty-three skills carry the flag, so this is the common case rather than an edge. They are installed. Type the slash command anyway, or check `.claude-plugin/plugin.json`, which is the authority on what is present.
 
 **It described a skill's behaviour, and the skill doesn't do that.**
 

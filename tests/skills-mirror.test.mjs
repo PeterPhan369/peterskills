@@ -3,29 +3,97 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 
-test('skills mirror: .agents/skills mirrors skills/engineering for all touched skills', () => {
-  const skills = ['ask-matt', 'ui-craft-floor', 'ui-polish', 'ui-review', 'ui-shape'];
+const TOUCHED_SKILLS = [
+  'ask-matt',
+  'ui-craft-floor',
+  'ui-polish',
+  'ui-review',
+  'ui-shape',
+  'backend-security-floor',
+  'security-review',
+  'setup-matt-pocock-skills',
+  'improve-codebase-architecture',
+];
 
-  for (const skill of skills) {
+const EXPECTED_EXTRA_FILES = {
+  'ask-matt': ['PHASE-BOUNDARIES.md'],
+  'ui-craft-floor': ['DETECTOR-RULES.md'],
+  'ui-polish': ['PLAYBOOKS.md'],
+  'backend-security-floor': [
+    'SECURITY-RULES.md',
+    'lang/c-cpp.md',
+    'lang/csharp.md',
+    'lang/go.md',
+    'lang/java.md',
+    'lang/javascript-typescript.md',
+    'lang/kotlin.md',
+    'lang/php.md',
+    'lang/python.md',
+    'lang/ruby.md',
+    'lang/rust.md',
+    'lang/swift.md',
+  ],
+  'setup-matt-pocock-skills': [
+    'domain.md',
+    'issue-tracker-github.md',
+    'issue-tracker-gitlab.md',
+    'issue-tracker-local.md',
+    'triage-labels.md',
+    'quality-floor-frontend.md',
+    'quality-floor-backend.md',
+  ],
+  'improve-codebase-architecture': ['HTML-REPORT.md'],
+};
+
+function collectSkillFiles(baseDir, currentDir = baseDir) {
+  const files = [];
+  for (const entry of fs.readdirSync(currentDir, { withFileTypes: true })) {
+    const full = path.join(currentDir, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...collectSkillFiles(baseDir, full));
+    } else if (entry.name.endsWith('.md') || entry.name.endsWith('.yaml')) {
+      files.push(path.relative(baseDir, full).replace(/\\/g, '/'));
+    }
+  }
+  return files.sort();
+}
+
+function normalizeNewlines(text) {
+  return text.replace(/\r\n/g, '\n');
+}
+
+test('skills mirror: .agents/skills recursively mirrors every .md and .yaml file for all 9 touched skills', () => {
+  for (const skill of TOUCHED_SKILLS) {
     const engDir = path.resolve('skills/engineering', skill);
     const agentDir = path.resolve('.agents/skills', skill);
 
     assert.ok(fs.existsSync(engDir), `skills/engineering/${skill} must exist`);
     assert.ok(fs.existsSync(agentDir), `.agents/skills/${skill} must exist`);
 
-    const engFiles = fs.readdirSync(engDir).filter(f => f.endsWith('.md'));
-    for (const file of engFiles) {
-      const engContent = fs.readFileSync(path.join(engDir, file), 'utf8');
-      const agentPath = path.join(agentDir, file);
+    const engFiles = collectSkillFiles(engDir);
+    const agentFiles = collectSkillFiles(agentDir);
 
-      assert.ok(fs.existsSync(agentPath), `.agents/skills/${skill}/${file} must exist`);
-      const agentContent = fs.readFileSync(agentPath, 'utf8');
+    assert.deepStrictEqual(
+      agentFiles,
+      engFiles,
+      `.agents/skills/${skill} file tree must match skills/engineering/${skill}`
+    );
 
-      const normalize = (str) => str.replace(/\r\n/g, '\n');
+    for (const required of ['SKILL.md', 'agents/openai.yaml', ...(EXPECTED_EXTRA_FILES[skill] ?? [])]) {
+      assert.ok(
+        engFiles.includes(required),
+        `skills/engineering/${skill} must include expected file ${required}`
+      );
+    }
+
+    for (const relPath of engFiles) {
+      const engContent = fs.readFileSync(path.join(engDir, relPath), 'utf8');
+      const agentContent = fs.readFileSync(path.join(agentDir, relPath), 'utf8');
+
       assert.strictEqual(
-        normalize(agentContent),
-        normalize(engContent),
-        `.agents/skills/${skill}/${file} must mirror skills/engineering/${skill}/${file}`
+        normalizeNewlines(agentContent),
+        normalizeNewlines(engContent),
+        `.agents/skills/${skill}/${relPath} must identically mirror skills/engineering/${skill}/${relPath}`
       );
     }
   }
