@@ -2,9 +2,10 @@
 // installer uses, so a skill that would be skipped on install fails here first.
 import { readFileSync, readdirSync } from "node:fs";
 import { join, relative } from "node:path";
+import { fileURLToPath } from "node:url";
 import { parseDocument } from "yaml";
 
-const root = new URL("..", import.meta.url).pathname;
+const root = fileURLToPath(new URL("..", import.meta.url));
 
 function* skillFiles(dir) {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
