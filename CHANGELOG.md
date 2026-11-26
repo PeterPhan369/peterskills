@@ -1,5 +1,17 @@
 # mattpocock-skills
 
+## 1.4.1
+
+### Patch Changes
+
+- [#1473](https://github.com/mattpocock/skills/pull/1473) [`4edd64a`](https://github.com/PeterPhan369/peterskills/commit/4edd64a19537607848e8ab999f95a370d3af8a49) Thanks [@mattpocock](https://github.com/mattpocock)! - `chief-of-staff` now centres on two jobs: delegate every task to a fresh subagent briefed with context pointers, relaying each result in 2 to 4 lines, and remember what it learned in the dated, commit-cited wiki. Improving the environment becomes a habit after each task rather than the first step of every message, and the schedules section and the tactical/strategic framing are gone.
+
+- [#1474](https://github.com/mattpocock/skills/pull/1474) [`419dac7`](https://github.com/PeterPhan369/peterskills/commit/419dac71f1dfe95e378bc1009f0b0fad2a3cb6ed) Thanks [@mattpocock](https://github.com/mattpocock)! - `chief-of-staff` relays lead with the outcome and anything the user must decide, adding detail only when it changes what they would do, in place of a fixed line count. The environment habit now runs after a task hit friction, as an offer to the user. It delegates the work rather than every task (description and opening line included): subagents do the work while questions, interviews and check-ins with the user stay in the main session.
+
+- [#1485](https://github.com/mattpocock/skills/pull/1485) [`2b7ab8c`](https://github.com/PeterPhan369/peterskills/commit/2b7ab8c9471fad3fca0a9c0c9e1f52153408172b) Thanks [@mattpocock](https://github.com/mattpocock)! - `domain-modeling` glossaries now show how terms relate inside their definitions: a definition that mentions another glossary term bolds it, and the sentence says how the two relate. Thanks to @stefaneg.
+
+- [#1453](https://github.com/mattpocock/skills/pull/1453) [`9201b96`](https://github.com/PeterPhan369/peterskills/commit/9201b96da4af2d663faa13bef984095bb69059b1) Thanks [@mattpocock](https://github.com/mattpocock)! - `software-factory` now installs with `npx skills add`: its description is quoted, so strict YAML parsers no longer read the colon in it as a nested mapping and skip the skill.
+
 ## 1.4.0
 
 ### Minor Changes
