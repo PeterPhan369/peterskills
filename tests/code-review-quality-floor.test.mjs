@@ -13,7 +13,22 @@ const CODE_REVIEW_DIR = path.resolve('skills/engineering/code-review');
 const CODE_REVIEW_MIRROR_DIR = path.resolve('.agents/skills/code-review');
 const CODE_REVIEW_DOC_PATH = path.resolve('docs/engineering/code-review.md');
 
-test('code-review: Step 3 discovers docs/agents/quality-floor.md and security-rules.md while isolating installed skill directories', () => {
+function assertDecoupledFromQualityFloor(text, label) {
+  assert.doesNotMatch(
+    text,
+    /docs\/agents\/quality-floor\.md/,
+    `${label} must not reference docs/agents/quality-floor.md`
+  );
+  assert.doesNotMatch(
+    text,
+    /docs\/agents\/security-rules\.md/,
+    `${label} must not reference docs/agents/security-rules.md`
+  );
+  assert.doesNotMatch(text, /Quality floor/i, `${label} must stay decoupled from Quality floor`);
+  assert.doesNotMatch(text, /Stack profile/i, `${label} must stay decoupled from Stack profile`);
+}
+
+test('code-review: Step 3 discovers repo standards docs and stays decoupled from Quality floors and security-rules', () => {
   const skillPath = path.join(CODE_REVIEW_DIR, 'SKILL.md');
   const content = fs.readFileSync(skillPath, 'utf8');
 
@@ -25,37 +40,7 @@ test('code-review: Step 3 discovers docs/agents/quality-floor.md and security-ru
 
   assert.match(step3, /CODING_STANDARDS\.md/, 'Step 3 must require CODING_STANDARDS.md when present');
   assert.match(step3, /CONTRIBUTING\.md/, 'Step 3 must require CONTRIBUTING.md when present');
-  assert.match(
-    step3,
-    /docs\/agents\/quality-floor\.md/,
-    'Step 3 must require including docs/agents/quality-floor.md whenever present'
-  );
-  assert.match(
-    step3,
-    /docs\/agents\/security-rules\.md/,
-    'Step 3 must require including docs/agents/security-rules.md whenever present'
-  );
-
-  assert.match(
-    step3,
-    /\.claude\/skills\//,
-    'Step 3 must explicitly name .claude/skills/ when excluding installed skill directories'
-  );
-  assert.match(
-    step3,
-    /\.agents\/skills\//,
-    'Step 3 must explicitly name .agents/skills/ when excluding installed skill directories'
-  );
-  assert.match(
-    step3,
-    /ignore|exclude/i,
-    'Step 3 must instruct ignoring or excluding installed skill directories during standards discovery'
-  );
-  assert.match(
-    step3,
-    /inactive[\s\S]*Stack profile|Stack profile[\s\S]*never/i,
-    'Step 3 must explain that ignoring installed skill directories prevents pulling an inactive Stack profile into Standards review'
-  );
+  assertDecoupledFromQualityFloor(content, 'code-review/SKILL.md');
 });
 
 test('code-review: .agents/skills/code-review mirrors source identically with zero em-dashes', () => {
@@ -86,7 +71,7 @@ test('code-review: .agents/skills/code-review mirrors source identically with ze
   }
 });
 
-test('code-review: docs/engineering/code-review.md Prerequisites documents active Quality floor and domain isolation per .agents/writing-docs.md', () => {
+test('code-review: docs/engineering/code-review.md follows .agents/writing-docs.md and Prerequisites stays decoupled from Quality floors', () => {
   const doc = fs.readFileSync(CODE_REVIEW_DOC_PATH, 'utf8');
 
   assertDocsCompliance(
@@ -115,17 +100,7 @@ test('code-review: docs/engineering/code-review.md Prerequisites documents activ
   assert.ok(prereqMatch, 'docs/engineering/code-review.md must contain ## Prerequisites');
   const prereq = prereqMatch[1];
 
-  assert.match(prereq, /\/setup-matt-pocock-skills/, 'Prerequisites must name /setup-matt-pocock-skills');
-  assert.match(prereq, /docs\/agents\/quality-floor\.md/, 'Prerequisites must document docs/agents/quality-floor.md');
-  assert.match(
-    prereq,
-    /docs\/agents\/security-rules\.md/,
-    'Prerequisites must document docs/agents/security-rules.md for backend repos'
-  );
-  assert.match(prereq, /`backend`|backend/i, 'Prerequisites must explain security-rules.md applies to backend repos');
-  assert.match(
-    prereq,
-    /inactive\s+domain|inactive\s+\*\*?Stack profile/i,
-    'Prerequisites must explain that rules from an inactive domain are never pulled in'
-  );
+  assert.match(prereq, /CODING_STANDARDS\.md/, 'Prerequisites must mention CODING_STANDARDS.md');
+  assert.match(prereq, /CONTRIBUTING\.md/, 'Prerequisites must mention CONTRIBUTING.md');
+  assertDecoupledFromQualityFloor(prereq, 'Prerequisites');
 });

@@ -27,24 +27,17 @@ Where it is confusable with siblings:
 
 ## Prerequisites
 
-None to run it. If `GLOSSARY.md` or ADRs in `docs/adr/` exist, it reads them and uses your domain's own nouns. A candidate then reads as "deepen the Order intake module," not "refactor the FooBarHandler." If your repo configured a **Stack profile** via [setup-matt-pocock-skills](https://aihero.dev/skills-setup-matt-pocock-skills), the exploration [subagent](https://www.aihero.dev/ai-coding-dictionary/subagent) also reads `docs/agents/quality-floor.md` (and `docs/agents/security-rules.md` when present) so structural findings align with your active **Quality floor**.
+None to run it. If `GLOSSARY.md` or ADRs in `docs/adr/` exist, it reads them and uses your domain's own nouns. A candidate then reads as "deepen the Order intake module," not "refactor the FooBarHandler."
 
 It writes in two places. The report goes to `<tmpdir>/architecture-review-<timestamp>.html`, outside the repo. During the grilling loop it adds or sharpens terms in `GLOSSARY.md`, and creates that file if it does not exist. It also offers to record a rejected candidate as an ADR, so a future run does not suggest it again.
 
 ## Depth, and the report that hunts for it
 
-The skill rests on one idea: **depth**. A deep module puts a lot of behaviour behind a small, stable interface. A shallow module exposes its implementation through an interface nearly as wide as the code beneath it. The report looks for three core forms of shallowness:
+The skill rests on one idea: **depth**. A deep module puts a lot of behaviour behind a small, stable interface. A shallow module exposes its implementation through an interface nearly as wide as the code beneath it. The report looks for three forms of shallowness:
 
 - Pure functions extracted only for testability, while the real bugs are in how callers use them (no **locality**).
 - Modules that leak across their **seams**.
 - A concept you cannot understand without opening five files.
-
-When an active **Quality floor** is present, the scan also flags profile-specific shallow seams:
-
-| Stack profile | What the exploration subagent flags |
-| --- | --- |
-| `frontend` | Scattered component and UI state seams spread across thin wrappers (without checking backend security rules) |
-| `backend` | Scattered authorization checks, raw configuration lookups with ad-hoc defaults or cliffs, and footgun cryptographic or primitive interfaces that should deepen toward **Pit of Success** modules |
 
 For each one, it proposes the deepening that fixes it.
 
@@ -104,7 +97,6 @@ The skill does not ship a good answer. People often ask for a `TYPESCRIPT.md` wi
 
 - The candidates name your domain's concepts, not invented class names: "the Order intake module," not "the FooBarHandler."
 - The candidates are in files you edited recently, not in parts of the repo nobody touches.
-- When `docs/agents/quality-floor.md` is configured, candidates reflect your **Stack profile** (UI/state seam locality for `frontend`, or centralized authorization, validated config, and Pit of Success interfaces for `backend`).
 - No code changed during the run. The only new file is the HTML report in your temp directory.
 - It stops after the report and asks which candidate you want. It does not continue on its own.
 - Each card explains the payoff as locality or leverage, and says which tests get simpler, not just "this is cleaner."
@@ -117,6 +109,5 @@ The skill does not ship a good answer. People often ask for a `TYPESCRIPT.md` wi
 - [codebase-design](https://aihero.dev/skills-codebase-design) owns the depth-and-seam vocabulary that every candidate uses.
 - [grilling](https://aihero.dev/skills-grilling) walks the decision tree after you choose a candidate.
 - [domain-modeling](https://aihero.dev/skills-domain-modeling) keeps `GLOSSARY.md` and the ADRs current as you make the decision.
-- [ui-craft-floor](https://aihero.dev/skills-ui-craft-floor) and [backend-security-floor](https://aihero.dev/skills-backend-security-floor) define the domain baselines behind the active **Quality floor** (seeded via [setup-matt-pocock-skills](https://aihero.dev/skills-setup-matt-pocock-skills)) that steers profile-specific seam discovery.
 
 Its output is an idea, which goes back into the main build flow at [grill-with-docs](https://aihero.dev/skills-grill-with-docs) or [to-spec](https://aihero.dev/skills-to-spec). Its counterpart at the end of the main flow is [retro](https://aihero.dev/skills-retro). This skill improves the code the agent works in, and `retro` improves the environment around it (checks, standards, steering files) after a build. For which skill fits a situation, [ask-matt](https://aihero.dev/skills-ask-matt) is the router over the whole set.

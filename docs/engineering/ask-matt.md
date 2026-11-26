@@ -21,7 +21,7 @@ You invoke this by typing `/ask-matt`; the [agent](https://www.aihero.dev/ai-cod
 
 The router names skills; it does not install them. Everything it points at has to be installed for the recommendation to be actionable, and it only knows the promoted skills in this repo.
 
-The tracker- and **Stack profile**-dependent routes (`triage`, `to-spec`, `to-tickets`, `implement`, `improve-codebase-architecture`, and domain checks) assume [setup-matt-pocock-skills](https://aihero.dev/skills-setup-matt-pocock-skills) has already configured an issue tracker and chosen `frontend` or `backend` (`docs/agents/quality-floor.md`, plus compiled `docs/agents/security-rules.md` for `backend`) in the repo. The router recommends them even before that has happened.
+The tracker- and **Stack profile**-dependent routes (`triage`, `to-spec`, `to-tickets`, `implement`, and domain checks) assume [setup-matt-pocock-skills](https://aihero.dev/skills-setup-matt-pocock-skills) has already configured an issue tracker and chosen `frontend` or `backend` (`docs/agents/quality-floor.md`, plus compiled `docs/agents/security-rules.md` for `backend`) in the repo. The router recommends them even before that has happened.
 
 ## Flows, not skills
 
@@ -30,10 +30,10 @@ The skill's leading word is **flow**, a path *through* the skills rather than a 
 - **The main flow**, idea to ship. Grill, spec, tickets, implement (one ticket at a time, or the whole task graph in parallel with [implement-spec](https://aihero.dev/skills-implement-spec)), review with [code-review](https://aihero.dev/skills-code-review), then [retro](https://aihero.dev/skills-retro), which feeds what the build taught back into the agent's environment. Two decisions shape the path, and domain checks branch by **Stack profile**:
   - **Prototype or shaping detour**: for `frontend`, [ui-shape](https://aihero.dev/skills-ui-shape) plans layout and component seams before code; for `backend`, [prototype](https://aihero.dev/skills-prototype) validates threat boundaries, API contracts, and fail-secure behavior.
   - **Spec-and-tickets split**: worth its cost only when the build spans more than one session.
-  - **Pre-merge quality pass**: for `frontend`, run [ui-polish](https://aihero.dev/skills-ui-polish) and [ui-review](https://aihero.dev/skills-ui-review) before `code-review`; for `backend`, run [security-review](https://aihero.dev/skills-security-review) alongside `code-review`.
+  - **Pre-merge quality pass**: for `frontend`, run [ui-review](https://aihero.dev/skills-ui-review) then [ui-polish](https://aihero.dev/skills-ui-polish) after `code-review`; for `backend`, run [security-review](https://aihero.dev/skills-security-review) after `code-review`.
 - **On-ramps**, for a situation that generates work and then merges onto the main flow: incoming bug reports, something broken, or an effort too foggy and too large to hold in one session.
 - **Codebase health**, upkeep rather than feature work:
-  - [improve-codebase-architecture](https://aihero.dev/skills-improve-codebase-architecture) reads the repo's active **Quality floor** (`docs/agents/quality-floor.md`) to survey deepening opportunities, and each one it finds re-enters the main flow as an idea.
+  - [improve-codebase-architecture](https://aihero.dev/skills-improve-codebase-architecture) surveys deepening opportunities, and each one it finds re-enters the main flow as an idea.
   - For `frontend`, `ui-review` audits usability heuristics and detector rules, and `ui-polish` refines interfaces directly.
   - For `backend`, `security-review` audits services or diffs through a five-step false-positive refutation gate.
 - **Standalones**, which sit off every flow and which you use on their own: the prototype, the questionnaire, the research run, and direct UI or security audits and baselines.

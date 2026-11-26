@@ -122,17 +122,27 @@ test('ask-matt: Main flow Step 2 and Step 3 branch cleanly by frontend vs. backe
 
   assert.match(
     step3,
-    /\/ui-polish[\s\S]*\/ui-review[\s\S]*\/code-review|\/ui-review[\s\S]*\/ui-polish[\s\S]*\/code-review/i,
-    'Step 3 must route frontend builds through /ui-polish and /ui-review before /code-review'
+    /`frontend`[^\n]*after\s+`\/code-review`[\s\S]*?\/ui-review[\s\S]*?\/ui-polish/i,
+    'Step 3 must route frontend builds to /ui-review (audit) then /ui-polish (fix) after /code-review'
+  );
+  assert.doesNotMatch(
+    step3,
+    /\/ui-polish[\s\S]*before[\s\S]*\/code-review/i,
+    'Step 3 must not route frontend UI checks before /code-review'
   );
   assert.match(
     step3,
-    /\/security-review[\s\S]*\/code-review|\/code-review[\s\S]*\/security-review/i,
-    'Step 3 must route backend builds to /security-review alongside /code-review'
+    /`backend`[^\n]*after\s+`\/code-review`[\s\S]*?\/security-review[^\n]*Diff Mode/i,
+    'Step 3 must route backend builds to /security-review (Diff Mode) after /code-review'
+  );
+  assert.doesNotMatch(
+    step3,
+    /alongside\s+`?\/code-review`?/i,
+    'Step 3 must route /security-review after /code-review rather than alongside it'
   );
 });
 
-test('ask-matt: Codebase health covers active Quality floor architecture deepening, UI skills, and security-review', () => {
+test('ask-matt: Codebase health keeps improve-codebase-architecture stack-agnostic alongside UI skills and security-review', () => {
   const skill = fs.readFileSync(ASK_MATT_SKILL_PATH, 'utf8');
   const health = extractSection(skill, '## Codebase health', '## Vocabulary underneath');
 
@@ -141,10 +151,12 @@ test('ask-matt: Codebase health covers active Quality floor architecture deepeni
     /\/improve-codebase-architecture/,
     'Codebase health must include /improve-codebase-architecture'
   );
-  assert.match(
-    health,
-    /Quality floor/i,
-    'Codebase health must note /improve-codebase-architecture reads the active Quality floor'
+  const archBulletMatch = health.match(/-\s+\*\*`\/improve-codebase-architecture`\*\*[^\n]*/);
+  assert.ok(archBulletMatch, 'Codebase health must include a bullet for /improve-codebase-architecture');
+  assert.doesNotMatch(
+    archBulletMatch[0],
+    /Quality floor|quality-floor\.md|security-rules\.md|Stack profile/i,
+    '/improve-codebase-architecture bullet must not mention Quality floor, quality-floor.md, security-rules.md, or Stack profile'
   );
   assert.match(health, /\/ui-review/, 'Codebase health must include /ui-review for frontend');
   assert.match(health, /\/ui-polish/, 'Codebase health must include /ui-polish for frontend');
@@ -252,6 +264,33 @@ test('ask-matt: docs/engineering/ask-matt.md obeys .agents/writing-docs.md and r
   assert.ok(protoLinkIdx !== -1, 'docs/engineering/ask-matt.md must link [prototyping](...)');
   const beforeProto = doc.slice(0, protoLinkIdx).replace(/`[^`]+`/g, '');
   assert.doesNotMatch(beforeProto, /\bprototyping\b/i, 'prototyping dictionary link must appear on first use');
+
+  const prereq = extractSection(doc, '## Prerequisites', '## Flows, not skills');
+  assert.doesNotMatch(
+    prereq,
+    /improve-codebase-architecture/,
+    'docs/engineering/ask-matt.md Prerequisites must not list improve-codebase-architecture as Stack profile-dependent'
+  );
+
+  const flows = extractSection(doc, '## Flows, not skills', '## The phase boundary');
+  assert.match(
+    flows,
+    /\[ui-review\]\([^\n]+\)\s+then\s+\[ui-polish\]\([^\n]+\)\s+after\s+`code-review`/i,
+    'docs/engineering/ask-matt.md must route frontend ui-review then ui-polish after code-review'
+  );
+  assert.match(
+    flows,
+    /\[security-review\]\([^\n]+\)\s+after\s+`code-review`/i,
+    'docs/engineering/ask-matt.md must route backend security-review after code-review'
+  );
+
+  const archDocBulletMatch = flows.match(/-\s+\[improve-codebase-architecture\][^\n]*/);
+  assert.ok(archDocBulletMatch, 'docs/engineering/ask-matt.md must include an improve-codebase-architecture bullet');
+  assert.doesNotMatch(
+    archDocBulletMatch[0],
+    /Quality floor|quality-floor\.md|security-rules\.md/i,
+    'docs/engineering/ask-matt.md improve-codebase-architecture bullet must not claim it reads docs/agents/quality-floor.md'
+  );
 });
 
 test('ask-matt: zero em-dashes and zero avoided glossary synonyms across skill, mirror, and doc', () => {

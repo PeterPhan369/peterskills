@@ -214,7 +214,23 @@ test('setup-matt-pocock-skills: seed templates quality-floor-frontend.md and qua
   assert.doesNotMatch(be, /### 42\./, 'quality-floor-backend.md must stay pointer-gated, not inline all 42 rules');
 });
 
-test('improve-codebase-architecture: SKILL.md maintains invocation rules, fresh context sub-agent, and integrates Quality floor', () => {
+function assertArchDecoupledFromQualityFloor(text, label) {
+  assert.doesNotMatch(
+    text,
+    /docs\/agents\/quality-floor\.md/,
+    `${label} must not reference docs/agents/quality-floor.md`
+  );
+  assert.doesNotMatch(
+    text,
+    /docs\/agents\/security-rules\.md/,
+    `${label} must not reference docs/agents/security-rules.md`
+  );
+  assert.doesNotMatch(text, /Quality floor/i, `${label} must stay decoupled from Quality floor`);
+  assert.doesNotMatch(text, /Stack profile/i, `${label} must stay decoupled from Stack profile`);
+  assert.doesNotMatch(text, /Pit of Success/i, `${label} must not embed backend Pit of Success framing`);
+}
+
+test('improve-codebase-architecture: SKILL.md maintains invocation rules, fresh context sub-agent, and stays decoupled from Quality floors', () => {
   const content = assertUserInvokedMetadata(ARCH_DIR, 'improve-codebase-architecture');
   assertNoSkillToolOnUserInvoked(content, 'improve-codebase-architecture/SKILL.md');
 
@@ -223,42 +239,9 @@ test('improve-codebase-architecture: SKILL.md maintains invocation rules, fresh 
   const step1 = step1Match[1];
 
   assert.match(step1, /fresh context window/i, 'Step 1 must explicitly require a fresh context window for the sub-agent');
-  assert.match(step1, /docs\/agents\/quality-floor\.md/, 'Step 1 must instruct reading docs/agents/quality-floor.md');
-  assert.match(
-    step1,
-    /docs\/agents\/security-rules\.md/,
-    'Step 1 must instruct reading docs/agents/security-rules.md when present'
-  );
-  assert.match(
-    step1,
-    /Quality floor/i,
-    'Step 1 must pass the active Quality floor into the exploration sub-agent'
-  );
-
-  // Profile-specific shallow module signals
-  assert.match(step1, /frontend/i, 'Step 1 must address frontend Quality floor exploration');
-  assert.match(
-    step1,
-    /component[\s\S]*state[\s\S]*seam|seam[\s\S]*component[\s\S]*state/i,
-    'Step 1 must guide frontend exploration to spot scattered component/state seams'
-  );
-  assert.match(step1, /backend/i, 'Step 1 must address backend Quality floor exploration');
-  assert.match(
-    step1,
-    /authorization/i,
-    'Step 1 must guide backend exploration to spot scattered authorization checks'
-  );
-  assert.match(
-    step1,
-    /configuration|config/i,
-    'Step 1 must guide backend exploration to spot raw configuration lookups or cliffs'
-  );
-  assert.match(
-    step1,
-    /cryptograph|primitive/i,
-    'Step 1 must guide backend exploration to spot footgun cryptographic/primitive APIs'
-  );
-  assert.match(step1, /Pit of Success/i, 'Step 1 must direct backend deepening toward Pit of Success interfaces');
+  assert.match(step1, /GLOSSARY\.md/, 'Step 1 must instruct reading GLOSSARY.md');
+  assert.match(step1, /\bADRs?\b/, 'Step 1 must instruct reading ADRs in the area being touched');
+  assertArchDecoupledFromQualityFloor(content, 'improve-codebase-architecture/SKILL.md');
 });
 
 test('docs: setup-matt-pocock-skills.md and improve-codebase-architecture.md document new behavior per .agents/writing-docs.md', () => {
@@ -296,10 +279,7 @@ test('docs: setup-matt-pocock-skills.md and improve-codebase-architecture.md doc
     "## It's working if",
     '## Where it fits',
   ]);
-  assert.match(archDoc, /docs\/agents\/quality-floor\.md/, 'architecture doc must reference docs/agents/quality-floor.md');
-  assert.match(archDoc, /docs\/agents\/security-rules\.md/, 'architecture doc must reference docs/agents/security-rules.md');
-  assert.match(archDoc, /Stack profile/i, 'architecture doc must mention Stack profile');
-  assert.match(archDoc, /Pit of Success/i, 'architecture doc must reference Pit of Success');
+  assertArchDecoupledFromQualityFloor(archDoc, 'docs/engineering/improve-codebase-architecture.md');
 });
 
 test('mirrors and invariants: .agents/skills mirrors match byte-for-byte (normalized) with zero em-dashes or avoided terms', () => {

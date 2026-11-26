@@ -22,20 +22,15 @@ This command is _informed_ by the project's domain model and built on a shared d
 - If the user named a direction (a module, a subsystem, a pain point), take it, and skip the inference below.
 - Otherwise, walk back a good stretch of the commit history (`git log --oneline`) to find the codebase's hot spots, the files and areas that keep coming up, and let those paths pull your attention first. If the changes are scattered with no clear hot spot, widen the net.
 
-Read the project's domain glossary (`GLOSSARY.md`), any ADRs in the area you're touching, and the repository's active **Quality floor** (`docs/agents/quality-floor.md`, plus `docs/agents/security-rules.md` when present) first. If `quality-floor.md` or `security-rules.md` is absent, proceed silently.
+Read the project's domain glossary (`GLOSSARY.md`) and any ADRs in the area you're touching first.
 
-Then spawn a sub-agent with a fresh context window to walk the codebase, passing the active **Quality floor** (and `docs/agents/security-rules.md` when present) into the sub-agent prompt. Don't follow rigid heuristics; explore organically and note where you experience friction:
+Then spawn a sub-agent with a fresh context window to walk the codebase. Don't follow rigid heuristics; explore organically and note where you experience friction:
 
 - Where does understanding one concept require bouncing between many small modules?
 - Where are modules **shallow**, with an interface nearly as complex as the implementation?
 - Where have pure functions been extracted just for testability, but the real bugs hide in how they're called (no **locality**)?
 - Where do tightly-coupled modules leak across their seams?
 - Which parts of the codebase are untested, or hard to test through their current interface?
-- When the active **Quality floor** is `frontend` (skip backend security rules): where are component and UI state seams scattered across thin wrappers instead of localized behind cohesive module interfaces?
-- When the active **Quality floor** is `backend`:
-  - Where are authorization checks scattered across handlers instead of enforced centrally at one deny-by-default seam?
-  - Where do raw configuration lookups create ad-hoc defaults or validation cliffs across callers instead of failing fast behind one validated config module?
-  - Where do footgun cryptographic or primitive APIs expose raw keys, nonces, algorithm names, or untyped parameters instead of deepening into **Pit of Success** interfaces?
 
 Apply the **deletion test** to anything you suspect is shallow: would deleting it concentrate complexity, or just move it? A "yes, concentrates" is the signal you want.
 
